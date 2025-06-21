@@ -15,15 +15,15 @@
 ######################################################################
 
 """
-YourResourceModel Service
+Shopcart Service
 
 This service implements a REST API that allows you to Create, Read, Update
-and Delete YourResourceModel
+and Delete Shopcart
 """
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from service.models import YourResourceModel
+from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
 
 
@@ -43,4 +43,58 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
+######################################################################
+# CREATE A NEW SHOPCART
+######################################################################
+@app.route("/shopcarts", methods=["POST"])
+def create_shopcarts():
+    """
+    Create a Shopcart
+    This endpoint will create a Shopcart based the data in the body that is posted
+    """
+    app.logger.info("Request to Create a Shopcart...")
+    check_content_type("application/json")
+
+    shopcart = Shopcart()
+    # Get the data from the request and deserialize it
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+    shopcart.deserialize(data)
+
+    # Save the new Shopcart to the database
+    shopcart.create()
+    app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
+
+    # Return the location of the new Shopcart
+
+    # Todo: uncomment when get_shopcarts is implemented
+    # location_url = url_for("get_shopcarts", shopcart_id=shopcart.id, _external=True)
+    location_url = "unknown"
+    return jsonify(shopcart.serialize()), status.HTTP_201_CREATED, {"Location": location_url}
+
+
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+
+
+######################################################################
+# Checks the ContentType of a request
+######################################################################
+def check_content_type(content_type) -> None:
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )

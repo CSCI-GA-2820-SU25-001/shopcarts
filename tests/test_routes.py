@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-TestYourResourceModel API Service Test Suite
+TestShopcart API Service Test Suite
 """
 
 # pylint: disable=duplicate-code
@@ -24,12 +24,13 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.common import status
-from service.models import db, YourResourceModel
+from service.models import db, Shopcart
+from .factories import ShopcartFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-
+BASE_URL = "/shopcarts"
 
 ######################################################################
 #  T E S T   C A S E S
@@ -56,7 +57,7 @@ class TestYourResourceService(TestCase):
     def setUp(self):
         """Runs before each test"""
         self.client = app.test_client()
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(Shopcart).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -72,4 +73,28 @@ class TestYourResourceService(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    # Todo: Add your test cases here...
+    def test_create_shopcart(self):
+        """It should Create a new Shopcart"""
+        test_shopcart = ShopcartFactory()
+        logging.debug("Test Shopcart: %s", test_shopcart.serialize())
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = response.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        new_shopcart = response.get_json()
+
+        # Todo: uncomment when shopcart database model is implemented
+        # self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+
+        # Todo: uncomment when get_shopcarts is implemented
+        # # Check that the location header was correct
+        # response = self.client.get(location)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # new_shopcart = response.get_json()
+        # self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
