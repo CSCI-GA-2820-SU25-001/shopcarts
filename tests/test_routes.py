@@ -98,3 +98,25 @@ class TestYourResourceService(TestCase):
         # new_shopcart = response.get_json()
         # self.assertEqual(new_shopcart["id"], test_shopcart.id)
         # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+
+
+    # ----------------------------------------------------------
+    # TEST UPDATE SHOPCART
+    # ----------------------------------------------------------
+    def test_update_shopcart(self):
+        """It should Update an existing Shopcart"""
+        # create a shopcart to update
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # update the shopcart
+        new_shopcart = response.get_json()
+        logging.debug(new_shopcart)
+        # Todo: update name to item_list upon model completion
+        new_shopcart["name"] = "unknown"
+        response = self.client.put(f"{BASE_URL}/{new_shopcart['id']}", json=new_shopcart)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_shopcart = response.get_json()
+        # Todo: update name to item_list upon model completion
+        self.assertEqual(updated_shopcart["name"], "unknown")
