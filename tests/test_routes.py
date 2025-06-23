@@ -36,7 +36,7 @@ BASE_URL = "/shopcarts"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceService(TestCase):
+class TestShopcartService(TestCase):
     """REST API Server Tests"""
 
     @classmethod
@@ -63,6 +63,23 @@ class TestYourResourceService(TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
+    
+    ############################################################
+    # Utility function to bulk create shopcarts
+    ############################################################
+    def _create_shopcarts(self, count: int = 1) -> list:
+        """Factory method to create shopcarts in bulk"""
+        shopcarts = []
+        for _ in range(count):
+            test_shopcart = ShopcartFactory()
+            response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+            )
+            new_shopcart = response.get_json()
+            test_shopcart.id = new_shopcart["id"]
+            shopcarts.append(test_shopcart)
+        return shopcarts
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -72,6 +89,10 @@ class TestYourResourceService(TestCase):
         """It should call the home page"""
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    # ----------------------------------------------------------
+    # TEST CREATE SHOPCART
+    # ----------------------------------------------------------
 
     def test_create_shopcart(self):
         """It should Create a new Shopcart"""
@@ -98,3 +119,23 @@ class TestYourResourceService(TestCase):
         # new_shopcart = response.get_json()
         # self.assertEqual(new_shopcart["id"], test_shopcart.id)
         # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+
+    # ----------------------------------------------------------
+    # TEST READ SHOPCART
+    # ----------------------------------------------------------
+    def test_get_shopcart(self):
+        """It should Get a single Shopcart"""
+        # get the id of a shopcart
+        test_shopcart = self._create_shopcarts(1)[0]
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["id"], test_shopcart.id)
+
+    def test_get_shopcart_not_found(self):
+        """It should not Get a Shopcart thats not found"""
+        response = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("was not found", data["message"])
