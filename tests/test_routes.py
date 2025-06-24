@@ -64,6 +64,23 @@ class TestYourResourceService(TestCase):
         """This runs after each test"""
         db.session.remove()
 
+    ############################################################
+    # Utility function to bulk create shopcarts
+    ############################################################
+    def _create_shopcarts(self, count: int = 1) -> list:
+        """Factory method to create shopcarts in bulk"""
+        shopcarts = []
+        for _ in range(count):
+            test_shopcart = ShopcartFactory()
+            response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+            )
+            new_shopcart = response.get_json()
+            test_shopcart.id = new_shopcart["id"]
+            shopcarts.append(test_shopcart)
+        return shopcarts
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -99,6 +116,26 @@ class TestYourResourceService(TestCase):
         # self.assertEqual(new_shopcart["id"], test_shopcart.id)
         # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
+    # ----------------------------------------------------------
+    # TEST DELETE SHOPCART
+    # ----------------------------------------------------------
+    def test_delete_shopcart(self):
+        """It should Delete a Shopcart"""
+        test_shopcart = self._create_shopcarts(1)[0]
+        response = self.client.delete(f"{BASE_URL}/{test_shopcart.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+
+        # Todo: uncomment when get_shopcart is merged
+        # # make sure they are deleted
+        # response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        # self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_non_existing_shopcart(self):
+        """It should Delete a Shopcart even if it doesn't exist"""
+        response = self.client.delete(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
 
     # ----------------------------------------------------------
     # TEST UPDATE SHOPCART
