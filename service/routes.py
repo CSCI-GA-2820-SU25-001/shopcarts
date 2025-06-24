@@ -40,7 +40,7 @@ def index():
 
 
 ######################################################################
-#  R E S T   A P I   E N D P O I N T S
+#  R E S T   A P I   E N D P O I N T S 
 ######################################################################
 
 ######################################################################
@@ -73,6 +73,25 @@ def create_shopcarts():
     return jsonify(shopcart.serialize()), status.HTTP_201_CREATED, {"Location": location_url}
 
 ######################################################################
+# READ A SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
+def get_shopcarts(shopcart_id):
+    """
+    Retrieve a single Shopcart
+
+    This endpoint will return a Shopcart based on it's id
+    """
+    app.logger.info("Request to Retrieve a shopcart with id [%s]", shopcart_id)
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(shopcart_id)
+    if not shopcart:
+        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{shopcart_id}' was not found.")
+
+    app.logger.info("Returning shopcart: %s", shopcart.shopcart_id)
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
 # DELETE A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["DELETE"])
