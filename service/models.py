@@ -6,6 +6,7 @@ All of the models are stored in this module
 
 import logging
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSONB
 
 logger = logging.getLogger("flask.app")
 
@@ -26,18 +27,17 @@ class Shopcart(db.Model):
     # Table Schema
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(63))
-
-    # Todo: Place the rest of your schema here...
+    customer_id = db.Column(db.Integer)
+    item_list = db.Column(JSONB)
 
     def __repr__(self):
-        return f"<Shopcart {self.name} id=[{self.id}]>"
+        return f"<Shopcart {self.customer_id} item_list=[{self.item_list}]>"
 
     def create(self):
         """
         Creates a Shopcart to the database
         """
-        logger.info("Creating %s", self.name)
+        logger.info("Creating shopcart for %d", self.customer_id)
         self.id = None  # pylint: disable=invalid-name
         try:
             db.session.add(self)
@@ -51,7 +51,7 @@ class Shopcart(db.Model):
         """
         Updates a Shopcart to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving shopcart for %d", self.customer_id)
         try:
             db.session.commit()
         except Exception as e:
@@ -61,7 +61,7 @@ class Shopcart(db.Model):
 
     def delete(self):
         """Removes a Shopcart from the data store"""
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting shopcart for %s", self.customer_id)
         try:
             db.session.delete(self)
             db.session.commit()
@@ -72,7 +72,7 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """Serializes a Shopcart into a dictionary"""
-        return {"id": self.id, "name": self.name}
+        return {"customer_id": self.customer_id, "item_list": self.item_list}
 
     def deserialize(self, data):
         """
@@ -82,7 +82,7 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"]
+            self.customer_id = data["customer_id"]
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
@@ -108,16 +108,6 @@ class Shopcart(db.Model):
 
     @classmethod
     def find(cls, by_id):
-        """Finds a Shopcart by it's ID"""
+        """Finds a Shopcart by customer ID"""
         logger.info("Processing lookup for id %s ...", by_id)
-        return cls.query.session.get(cls, by_id)
-
-    @classmethod
-    def find_by_name(cls, name):
-        """Returns all Shopcarts with the given name
-
-        Args:
-            name (string): the name of the Shopcarts you want to match
-        """
-        logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
+        return cls.query.session.filter_by(customer_id=by_id)
