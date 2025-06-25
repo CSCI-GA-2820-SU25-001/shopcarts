@@ -92,8 +92,10 @@ class TestShopcart(TestCase):
         resource.create()
         self.assertIsNotNone(resource.id)
         data = Shopcart.find(resource.customer_id)
+        original_id = resource.customer_id
         data.customer_id = 44
-        found = Shopcart.find(resource.customer_id)
-        self.assertEqual(len(found), 0)
+        db.session.commit()
+        found = Shopcart.find(original_id)
+        self.assertIsNone(found)
         found = Shopcart.find(44)
-        self.assertEqual(len(found), 1)
+        self.assertEqual(len(found.all()), 1)

@@ -130,7 +130,7 @@ def get_all_shopcarts():
         )
 
     app.logger.info("Returning shopcarts: %s", shopcart)
-    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+    return jsonify(shopcart), status.HTTP_200_OK
 
 
 ######################################################################

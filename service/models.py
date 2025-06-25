@@ -171,9 +171,13 @@ class Shopcart(db.Model):
         """Returns all of the Shopcarts in the database"""
         logger.info("Processing all Shopcarts")
         return cls.query.all()
-
+        
     @classmethod
     def find(cls, by_id):
         """Finds a Shopcart by customer ID"""
         logger.info("Processing lookup for id %s ...", by_id)
-        return cls.query.session.filter_by(customer_id=by_id).first()
+        return cls.query.filter_by(customer_id=by_id).first()
+    
+    @classmethod
+    def save(cls):
+        db.session.commit()
