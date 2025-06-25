@@ -7,6 +7,7 @@ All of the models are stored in this module
 import logging
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableList
 
 logger = logging.getLogger("flask.app")
 
@@ -28,7 +29,7 @@ class Shopcart(db.Model):
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer)
-    item_list = db.Column(JSONB)
+    item_list = db.Column(MutableList.as_mutable(JSONB), default=list)
 
     def __repr__(self):
         return f"<Shopcart {self.customer_id} item_list={self.item_list}>"
@@ -55,12 +56,16 @@ class Shopcart(db.Model):
         Creates an item to the Shopcart item_list
         """
         logger.info(
-            "Creating product %d for %d 's shopcart", data.product_id, customer_id
+            "Creating product %d for %d 's shopcart", data["product_id"], customer_id
         )
         try:
-            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart = self.find(customer_id)
+            print(cart.item_list, "111111")
+            print(data, "333333")
             cart.item_list.append(data)
+            print(cart.item_list, "444444")
             db.session.commit()
+            print(cart.item_list, "222222")
         except Exception as e:
             db.session.rollback()
             logger.error(
@@ -123,7 +128,6 @@ class Shopcart(db.Model):
                 if item["product_id"] == product_id:
                     continue
                 newlist.append(item)
-
             cart.item_list = newlist
             db.session.commit()
         except Exception as e:

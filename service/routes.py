@@ -79,8 +79,8 @@ def create_shopcarts():
 ######################################################################
 # CREATE A NEW ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["POST"])
-def create_shopcarts_item(customer_id, product_id):
+@app.route("/shopcarts/<int:customer_id>/items", methods=["POST"])
+def create_shopcarts_item(customer_id):
     """
     Create a Shopcart item
     This endpoint will create a Shopcart item based the data in the body that is posted
@@ -95,7 +95,7 @@ def create_shopcarts_item(customer_id, product_id):
 
     # Save the new Shopcart to the database
     shopcart.create_subordinate(customer_id, data)
-    app.logger.info("Shopcart item with new id [%d] saved!", product_id)
+    app.logger.info("Shopcart item with new id saved!")
 
     # Return the location of the new Shopcart
 

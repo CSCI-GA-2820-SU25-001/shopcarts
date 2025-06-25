@@ -122,27 +122,34 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     def test_create_shopcart_subordinate(self):
+        """It should Create a new Shopcart Item"""
         test_shopcart = ShopcartFactory()
         logging.debug("Test Shopcart: %s", test_shopcart.serialize())
         response = self.client.post(BASE_URL, json=test_shopcart.serialize())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        # Make sure location header is set
-        location = response.headers.get("Location", None)
-        self.assertIsNotNone(location)
+        customer_id = test_shopcart.customer_id
+        new_item = {
+            "product_id": 1,
+            "description": "Banana",
+            "price": 100,
+            "quantity": 2,
+        }
 
-        # Check the data is correct
-        new_shopcart = response.get_json()
+        response = self.client.post(
+            f"{BASE_URL}/{customer_id}/items",
+            json=new_item,
+            content_type="application/json"
+        )
 
-        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
-        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Check that the location header was correct
-        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
+        response = self.client.get(f"{BASE_URL}/{customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
-        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
-        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        self.assertEqual(new_shopcart["customer_id"], customer_id)
+        self.assertEqual(new_shopcart["item_list"][0]["product_id"], new_item["product_id"])
 
     # ----------------------------------------------------------
     # TEST READ SHOPCART
