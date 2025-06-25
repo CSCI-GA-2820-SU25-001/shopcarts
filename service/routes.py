@@ -103,7 +103,7 @@ def create_shopcarts_item(customer_id):
         "create_shopcarts_item", customer_id=customer_id, _external=True
     )
     return (
-        jsonify(shopcart.serialize()),
+        jsonify(data),
         status.HTTP_201_CREATED,
         {"Location": location_url},
     )
