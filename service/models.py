@@ -37,6 +37,8 @@ class Shopcart(db.Model):
         """
         Creates a Shopcart to the database
         """
+        if not self.customer_id:
+            self.customer_id = 33
         logger.info("Creating shopcart for %d", self.customer_id)
         self.id = None  # pylint: disable=invalid-name
         self.item_list = []
@@ -104,6 +106,24 @@ class Shopcart(db.Model):
         logger.info("Deleting shopcart for customer %s", self.customer_id)
         try:
             db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Error deleting record: %s", self)
+            raise DataValidationError(e) from e
+
+    def delete_subordinate(self, customer_id, product_id):
+        """Removes a Shopcart from the data store"""
+        logger.info("Deleting shopcart for customer %s", customer_id)
+        try:
+            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            newlist = []
+            for item in cart.item_list:
+                if item.product_id == product_id:
+                    continue
+                newlist.append(item)
+
+            cart.item_list = newlist
             db.session.commit()
         except Exception as e:
             db.session.rollback()

@@ -65,15 +65,35 @@ class TestShopcart(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
+    def test_create(self):
         """It should create a Shopcart"""
-        # Todo: Remove this test case example
         resource = ShopcartFactory()
         resource.create()
         self.assertIsNotNone(resource.id)
         found = Shopcart.all()
         self.assertEqual(len(found), 1)
-        data = Shopcart.find(resource.id)
-        self.assertEqual(data.name, resource.name)
+        data = Shopcart.find(resource.customer_id)
+        self.assertEqual(data.customer_id, resource.customer_id)
 
-    # Todo: Add your test cases here...
+    def test_delete(self):
+        """It should delete created shopcart"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        found = Shopcart.all()
+        self.assertEqual(len(found), 1)
+        resource.delete()
+        found = Shopcart.all()
+        self.assertEqual(len(found), 0)
+
+    def test_update(self):
+        """It should update created shopcart"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        data = Shopcart.find(resource.customer_id)
+        data.customer_id = 44
+        found = Shopcart.find(resource.customer_id)
+        self.assertEqual(len(found), 0)
+        found = Shopcart.find(44)
+        self.assertEqual(len(found), 1)
