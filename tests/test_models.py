@@ -34,6 +34,7 @@ DATABASE_URI = os.getenv(
 ######################################################################
 #  Shopcart   M O D E L   T E S T   C A S E S
 ######################################################################
+
 # pylint: disable=too-many-public-methods
 class TestShopcart(TestCase):
     """Test Cases for Shopcart Model"""
@@ -99,3 +100,17 @@ class TestShopcart(TestCase):
         self.assertIsNone(found)
         found = Shopcart.find(44)
         self.assertEqual(len(found.all()), 1)
+    
+    # ----------------------------------------------------------
+    # Sad Data Validation test.
+    # ----------------------------------------------------------
+    def test_deserialize_missing_data(self):
+        """It should raise a DataValidationError if required fields are missing"""
+        data = {"item_list": []}  # missing customer_id
+        shopcart = Shopcart()
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+    
+    
+
+    
