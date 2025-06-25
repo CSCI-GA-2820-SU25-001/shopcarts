@@ -110,6 +110,30 @@ def create_shopcarts_item(customer_id, product_id):
 
 
 ######################################################################
+# LIST ALL SHOPCARTS
+######################################################################
+@app.route("/shopcarts", methods=["GET"])
+def get_all_shopcarts():
+    """
+    Retrieve all Shopcart
+
+    This endpoint will return all entries in the database
+    """
+    app.logger.info("Request to Retrieve all shopcarts")
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.all()
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"No user has any active shopcarts",
+        )
+
+    app.logger.info("Returning shopcarts: %s", shopcart)
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
 # READ A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
@@ -150,6 +174,11 @@ def delete_shopcarts(shopcart_id):
     if shopcart:
         app.logger.info("Shopcart with ID: %d found.", shopcart.id)
         shopcart.delete()
+    else:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart with id '{shopcart_id}' was not found to delete.",
+        )
 
     app.logger.info("Shopcart with ID: %d delete complete.", shopcart_id)
     return {}, status.HTTP_204_NO_CONTENT
@@ -185,31 +214,66 @@ def check_content_type(content_type) -> None:
 ######################################################################
 # UPDATE AN EXISTING SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>", methods=["PUT"])
-def update_shopcarts(shopcart_id):
+@app.route("/shopcarts/<int:customer_id>", methods=["PUT"])
+def update_shopcarts(customer_id):
     """
     Update a Shopcart
 
     This endpoint will update a Shopcart based the body that is posted
     """
-    app.logger.info("Request to Update a shopcart with id [%s]", shopcart_id)
+    app.logger.info("Request to Update a shopcart for customer [%d]", customer_id)
     check_content_type("application/json")
 
     # Attempt to find the Shopcart and abort if not found
-    shopcart = Shopcart.find(shopcart_id)
+    shopcart = Shopcart.find(customer_id)
     if not shopcart:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"Shopcart with id '{shopcart_id}' was not found.",
+            f"Shopcart for customer '{customer_id}' was not found.",
         )
 
     # Update the Shopcart with the new data
     data = request.get_json()
     app.logger.info("Processing: %s", data)
-    shopcart.deserialize(data)
 
     # Save the updates to the database
-    shopcart.update()
+    shopcart.update(customer_id, data)
 
-    app.logger.info("Shopcart with ID: %d updated.", shopcart.id)
+    app.logger.info("Shopcart for customer %d updated.", customer_id)
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# UPDATE INDIVIDUAL ITEM IN SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items/<int:product_id>", methods=["PUT"])
+def update_shopcarts_item(customer_id, product_id):
+    """
+    Update a Shopcart
+
+    This endpoint will update a Shopcart based the body that is posted
+    """
+    app.logger.info(
+        "Request to Update a shopcart item [%d] for customer [%d]",
+        product_id,
+        customer_id,
+    )
+    check_content_type("application/json")
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(customer_id)
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart for customer '{customer_id}' was not found.",
+        )
+
+    # Update the Shopcart with the new data
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+
+    # Save the updates to the database
+    shopcart.update_subordinate()
+
+    app.logger.info("Shopcart for customer %d updated.", customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
