@@ -55,10 +55,10 @@ class Shopcart(db.Model):
         """
         Creates an item to the Shopcart item_list
         """
-        logger.info(
-            "Creating product %d for %d 's shopcart", data["product_id"], customer_id
-        )
         try:
+            logger.info(
+                "Creating product %d for %d 's shopcart", data["product_id"], customer_id
+            )
             cart = self.find(customer_id)
             cart.item_list.append(data)
             db.session.commit()
