@@ -110,7 +110,38 @@ class TestShopcart(TestCase):
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
-    
-    
+    # ----------------------------------------------------------
+    # Sad Delete Item test.
+    # ----------------------------------------------------------
+    def test_delete_subordinate_invalid(self):
+        """It should raise DataValidationError when deleting an item from a nonexistent cart"""
+        shopcart = Shopcart()
+        self.assertRaises(DataValidationError, shopcart.delete_subordinate, 9999, 123)
 
-    
+    # ----------------------------------------------------------
+    # Sad Delete shopcart test
+    # -----------------------------------------------------------
+    def test_delete_invalid_shopcart(self):
+        """It should raise DataValidationError when deleting a shopcart with no ID"""
+        shopcart = Shopcart(id=9999)
+        self.assertRaises(DataValidationError, shopcart.delete)
+
+    # ----------------------------------------------------------
+    # Sad Update shopcart test
+    # -----------------------------------------------------------
+    def test_update_invalid_shopcart(self):
+        """It should raise DataValidationError when updating a nonexistent shopcart"""
+        shopcart = Shopcart()
+        updated_data = [
+            {"product_id": 1, "description": "Item", "price": 50, "quantity": 1}
+        ]
+        self.assertRaises(DataValidationError, shopcart.update, 9999, updated_data)
+
+    # ----------------------------------------------------------
+    # Sad Update item test (shopcart does not exist)
+    # -----------------------------------------------------------
+    def test_update_subordinate_invalid_shopcart(self):
+        """It should raise DataValidationError when updating an item in nonexistent cart"""
+        shopcart = Shopcart()
+        new_item = {"product_id": 99, "description": "X", "price": 50, "quantity": 2}
+        self.assertRaises(DataValidationError, shopcart.update_subordinate, 9999, new_item)
