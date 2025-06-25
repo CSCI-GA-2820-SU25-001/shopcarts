@@ -170,17 +170,43 @@ class TestShopcartService(TestCase):
     def test_delete_shopcart(self):
         """It should Delete a Shopcart"""
         test_shopcart = self._create_shopcarts(1)[0]
-        response = self.client.delete(f"{BASE_URL}/{test_shopcart.id}")
+        response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
 
         # make sure they are deleted
-        response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_non_existing_shopcart(self):
         """It should Delete a Shopcart even if it doesn't exist"""
         response = self.client.delete(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+
+    # -----------------------------------------------------------
+    # TEST DELETE SHOPCART ITEM
+    # ----------------------------------------------------------
+    def test_delete_shopcart_subordinate(self):
+        """It should Delete a Shopcart"""
+        test_shopcart = self._create_shopcarts(1)[0]
+        test_shopcart.item_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        new_list = [
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        # make sure they are deleted
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
+        self.assertEqual(response.get_json().item_list, new_list)
+
+    def test_delete_non_existing_shopcart_subordinate(self):
+        """It should Delete a Shopcart even if it doesn't exist"""
+        test_shopcart = self._create_shopcarts(1)[0]
+        response = self.client.delete(f"{BASE_URL}{test_shopcart.customer_id}/items/0")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
 
