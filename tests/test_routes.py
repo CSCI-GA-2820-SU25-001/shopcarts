@@ -115,7 +115,7 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
-        response = self.client.get(location)
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
         self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
@@ -138,7 +138,7 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
-        response = self.client.get(location)
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
         self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)

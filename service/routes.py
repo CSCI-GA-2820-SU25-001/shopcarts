@@ -168,7 +168,6 @@ def get_shopcarts(customer_id):
     This endpoint will return a Shopcart based on it's id
     """
     app.logger.info("Request to Retrieve a shopcart with customer id [%s]", customer_id)
-
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.find(customer_id)
     if not shopcart:
@@ -226,20 +225,14 @@ def delete_shopcarts_item(customer_id, product_id):
         product_id,
         customer_id,
     )
-    print("test!!!!")
 
     # Delete the Shopcart if it exists
     shopcart = Shopcart.find(customer_id)
-    print("1test!!!!")
     if shopcart:
         app.logger.info("Shopcart for customer: %d found.", customer_id)
-        print("2test!!!!")
         shopcart.delete_subordinate(customer_id, product_id)
-        print("3test!!!!")
     else:
         app.logger.info("Shopcart for customer: %d found.", customer_id)
-        print("4test!!!!")
-    print("test!!!!")
     app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
 
