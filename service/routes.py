@@ -154,7 +154,7 @@ def get_all_shopcarts_items(customer_id):
         )
 
     app.logger.info("Returning shopcart items: %s", shopcart)
-    return jsonify(shopcart["items_list"]), status.HTTP_200_OK
+    return jsonify(shopcart["item_list"]), status.HTTP_200_OK
 
 
 ######################################################################
@@ -179,6 +179,37 @@ def get_shopcarts(customer_id):
 
     app.logger.info("Returning shopcart: %s", shopcart.customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# READ AN INDIVIDUAL ITEM FROM SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["GET"])
+def get_shopcarts_item(customer_id, product_id):
+    """
+    Retrieve a single Shopcart
+
+    This endpoint will return a Shopcart based on it's id
+    """
+    app.logger.info("Request to Retrieve a shopcart with customer id [%s]", customer_id)
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(customer_id)
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart for customer '{customer_id}' was not found.",
+        )
+    item_list = shopcart["item_list"]
+    for item in item_list:
+        if item.product_id == product_id:
+            app.logger.info("Returning shopcart: %s", shopcart.customer_id)
+            return jsonify(item), status.HTTP_200_OK
+
+    abort(
+        status.HTTP_404_NOT_FOUND,
+        f"Product '{product_id}' was not found in cart.",
+    )
 
 
 ######################################################################
