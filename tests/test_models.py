@@ -145,3 +145,24 @@ class TestShopcart(TestCase):
         shopcart = Shopcart()
         new_item = {"product_id": 99, "description": "X", "price": 50, "quantity": 2}
         self.assertRaises(DataValidationError, shopcart.update_subordinate, 9999, new_item)
+
+    # ----------------------------------------------------------
+    # Sad create tests 
+    # -----------------------------------------------------------
+    def test_error_creating_shopcart(self):
+        """Raises a DataValidationError if invalid input on create"""
+        shopcart = Shopcart()
+        shopcart.customer_id = "error"
+        self.assertRaises(DataValidationError, shopcart.create)
+    
+    def test_error_creating_item(self):
+        """It should create a Item"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        found = Shopcart.all()
+        self.assertEqual(len(found), 1)
+        data = Shopcart.find(resource.customer_id)
+        self.assertEqual(data.customer_id, resource.customer_id)
+        new_item = 2
+        self.assertRaises(DataValidationError, resource.create_subordinate, resource.customer_id, new_item)
