@@ -134,6 +134,30 @@ def get_all_shopcarts():
 
 
 ######################################################################
+# LIST ALL SHOPCART ITEMS
+######################################################################
+@app.route("/shopcarts/<int:customer_id>/items", methods=["GET"])
+def get_all_shopcarts_items(customer_id):
+    """
+    Retrieve all Shopcart items
+
+    This endpoint will return all entries in the database
+    """
+    app.logger.info("Request to Retrieve all shopcart items for customer")
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(customer_id)
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"User has no shop cart available",
+        )
+
+    app.logger.info("Returning shopcart items: %s", shopcart)
+    return jsonify(shopcart["items_list"]), status.HTTP_200_OK
+
+
+######################################################################
 # READ A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:customer_id>", methods=["GET"])
