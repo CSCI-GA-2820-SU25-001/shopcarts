@@ -5,6 +5,7 @@ All of the models are stored in this module
 """
 
 import logging
+from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -31,7 +32,7 @@ class Shopcart(db.Model):
     item_list = db.Column(JSONB)
 
     def __repr__(self):
-        return f"<Shopcart {self.customer_id} item_list=[{self.item_list}]>"
+        return f"<Shopcart {self.customer_id} item_list={self.item_list}>"
 
     def create(self):
         """
@@ -39,12 +40,33 @@ class Shopcart(db.Model):
         """
         logger.info("Creating shopcart for %d", self.customer_id)
         self.id = None  # pylint: disable=invalid-name
+        self.item_list = []
         try:
             db.session.add(self)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             logger.error("Error creating record: %s", self)
+            raise DataValidationError(e) from e
+
+    def create_subordinate(self, customer_id, data):
+        """
+        Creates an item to the Shopcart item_list
+        """
+        logger.info(
+            "Creating product %d for %d 's shopcart", data.product_id, self.customer_id
+        )
+        try:
+            self.deserialize(
+                db.session.query(self).filter_by(customer_id=customer_id).first()
+            )
+            self.item_list.append(data)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error(
+                "Error creating record for customer %d : %s", self.customer_id, data
+            )
             raise DataValidationError(e) from e
 
     def update(self):
@@ -83,6 +105,7 @@ class Shopcart(db.Model):
         """
         try:
             self.customer_id = data["customer_id"]
+            self.item_list = data["item_list"]
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
@@ -110,4 +133,4 @@ class Shopcart(db.Model):
     def find(cls, by_id):
         """Finds a Shopcart by customer ID"""
         logger.info("Processing lookup for id %s ...", by_id)
-        return cls.query.session.filter_by(customer_id=by_id)
+        return cls.query.session.filter_by(customer_id=by_id).first()

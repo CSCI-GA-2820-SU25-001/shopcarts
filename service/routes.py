@@ -28,20 +28,21 @@ from service.common import status  # HTTP Status Codes
 
 
 ######################################################################
-# GET INDEX
+# HEALTH CHECK
 ######################################################################
 @app.route("/")
 def index():
     """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
+        jsonify({"message": "Shopcart API is healthy"}),
         status.HTTP_200_OK,
     )
 
 
 ######################################################################
-#  R E S T   A P I   E N D P O I N T S 
+#  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
 
 ######################################################################
 # CREATE A NEW SHOPCART
@@ -67,10 +68,46 @@ def create_shopcarts():
 
     # Return the location of the new Shopcart
 
-    # Todo: uncomment when get_shopcarts is implemented
-    # location_url = url_for("get_shopcarts", shopcart_id=shopcart.id, _external=True)
-    location_url = "unknown"
-    return jsonify(shopcart.serialize()), status.HTTP_201_CREATED, {"Location": location_url}
+    location_url = url_for("create_shopcarts", shopcart_id=shopcart.id, _external=True)
+    return (
+        jsonify(shopcart.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
+
+######################################################################
+# CREATE A NEW ITEM IN SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["POST"])
+def create_shopcarts_item(customer_id, product_id):
+    """
+    Create a Shopcart item
+    This endpoint will create a Shopcart item based the data in the body that is posted
+    """
+    app.logger.info("Request to Create a Shopcart item...")
+    check_content_type("application/json")
+
+    shopcart = Shopcart()
+    # Get the data from the request and deserialize it
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+
+    # Save the new Shopcart to the database
+    shopcart.create_subordinate(customer_id, data)
+    app.logger.info("Shopcart item with new id [%d] saved!", product_id)
+
+    # Return the location of the new Shopcart
+
+    location_url = url_for(
+        "create_shopcarts_item", customer_id=customer_id, _external=True
+    )
+    return (
+        jsonify(shopcart.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
 
 ######################################################################
 # READ A SHOPCART
@@ -87,11 +124,16 @@ def get_shopcarts(shopcart_id):
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.find(shopcart_id)
     if not shopcart:
-        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{shopcart_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart with id '{shopcart_id}' was not found.",
+        )
 
     app.logger.info("Returning shopcart: %s", shopcart.shopcart_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
 
+
+######################################################################
 # DELETE A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["DELETE"])
@@ -139,6 +181,7 @@ def check_content_type(content_type) -> None:
         f"Content-Type must be {content_type}",
     )
 
+
 ######################################################################
 # UPDATE AN EXISTING SHOPCART
 ######################################################################
@@ -155,7 +198,10 @@ def update_shopcarts(shopcart_id):
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.find(shopcart_id)
     if not shopcart:
-        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{shopcart_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart with id '{shopcart_id}' was not found.",
+        )
 
     # Update the Shopcart with the new data
     data = request.get_json()
