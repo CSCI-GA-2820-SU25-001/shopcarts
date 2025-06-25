@@ -76,6 +76,24 @@ class TestShopcart(TestCase):
         data = Shopcart.find(resource.customer_id)
         self.assertEqual(data.customer_id, resource.customer_id)
 
+    def test_create_item(self):
+        """It should create a Item"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        found = Shopcart.all()
+        self.assertEqual(len(found), 1)
+        data = Shopcart.find(resource.customer_id)
+        self.assertEqual(data.customer_id, resource.customer_id)
+        new_item = {
+            "product_id": 1,
+            "description": "Banana",
+            "price": 100,
+            "quantity": 2,
+        }
+        resource.create_subordinate(resource.customer_id, new_item)
+
+
     def test_delete(self):
         """It should delete created shopcart"""
         resource = ShopcartFactory()
@@ -109,8 +127,61 @@ class TestShopcart(TestCase):
         data = {"item_list": []}  # missing customer_id
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
+    # ----------------------------------------------------------
+    # Sad Delete Item test.
+    # ----------------------------------------------------------
+    def test_delete_subordinate_invalid(self):
+        """It should raise DataValidationError when deleting an item from a nonexistent cart"""
+        shopcart = Shopcart()
+        self.assertRaises(DataValidationError, shopcart.delete_subordinate, 9999, 123)
 
+    # ----------------------------------------------------------
+    # Sad Delete shopcart test
+    # -----------------------------------------------------------
+    def test_delete_invalid_shopcart(self):
+        """It should raise DataValidationError when deleting a shopcart with no ID"""
+        shopcart = Shopcart(id=9999)
+        self.assertRaises(DataValidationError, shopcart.delete)
+
+    # ----------------------------------------------------------
+    # Sad Update shopcart test
+    # -----------------------------------------------------------
+    def test_update_invalid_shopcart(self):
+        """It should raise DataValidationError when updating a nonexistent shopcart"""
+        shopcart = Shopcart()
+        updated_data = [
+            {"product_id": 1, "description": "Item", "price": 50, "quantity": 1}
+        ]
+        self.assertRaises(DataValidationError, shopcart.update, 9999, updated_data)
+
+    # ----------------------------------------------------------
+    # Sad Update item test (shopcart does not exist)
+    # -----------------------------------------------------------
+    def test_update_subordinate_invalid_shopcart(self):
+        """It should raise DataValidationError when updating an item in nonexistent cart"""
+        shopcart = Shopcart()
+        new_item = {"product_id": 99, "description": "X", "price": 50, "quantity": 2}
+        self.assertRaises(DataValidationError, shopcart.update_subordinate, 9999, new_item)
+
+    # ----------------------------------------------------------
+    # Sad create tests 
+    # -----------------------------------------------------------
+    def test_error_creating_shopcart(self):
+        """Raises a DataValidationError if invalid input on create"""
+        shopcart = Shopcart()
+        shopcart.customer_id = "error"
+        self.assertRaises(DataValidationError, shopcart.create)
     
-    
+    def test_error_creating_item(self):
+        """It should create a Item"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        found = Shopcart.all()
+        self.assertEqual(len(found), 1)
+        data = Shopcart.find(resource.customer_id)
+        self.assertEqual(data.customer_id, resource.customer_id)
+        new_item = 2
+        self.assertRaises(DataValidationError, resource.create_subordinate, resource.customer_id, new_item)
 
     
