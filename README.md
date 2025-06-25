@@ -56,7 +56,6 @@ The Shopcarts service has these API endpoints:
 | **List all items in a shopcart**  | GET    | `/shopcarts/{customer_id}/items`              |
 | **Update a shopcart item**        | PUT    | `/shopcarts/{customer_id}/items/{product_id}` |
 | **Delete a shopcart item**        | DELETE | `/shopcarts/{customer_id}/items/{product_id}` |
-| **Delete all items in a shopcart**| DELETE | `/shopcarts/{customer_id}/items`              |
 
 
 ## Commands for running tests and services.
