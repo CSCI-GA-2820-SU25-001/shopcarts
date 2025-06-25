@@ -201,7 +201,7 @@ def get_shopcarts_item(customer_id, product_id):
         )
     item_list = shopcart.item_list
     for item in item_list:
-        if item.product_id == product_id:
+        if item["product_id"] == product_id:
             app.logger.info("Returning shopcart: %s", shopcart.customer_id)
             return jsonify(item), status.HTTP_200_OK
 

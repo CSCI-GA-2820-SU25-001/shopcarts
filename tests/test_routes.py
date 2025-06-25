@@ -174,6 +174,49 @@ class TestShopcartService(TestCase):
         self.assertIn("was not found", data["message"])
 
     # ----------------------------------------------------------
+    # TEST READ INDIVIDUAL ITEM IN SHOPCART
+    # ----------------------------------------------------------
+    def test_get_shopcart_item(self):
+        """It should Get a single Shopcart item"""
+        # get the id of a shopcart
+        test_shopcart = self._create_shopcarts(1)[0]
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.put(
+            f"{BASE_URL}/{test_shopcart.customer_id}", json=new_list
+        )
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["price"], new_list[0]["price"])
+        self.assertEqual(data["quantity"], new_list[0]["quantity"])
+        self.assertEqual(data["description"], new_list[0]["description"])
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/2")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["price"], new_list[1]["price"])
+        self.assertEqual(data["quantity"], new_list[1]["quantity"])
+        self.assertEqual(data["description"], new_list[1]["description"])
+
+    def test_get_shopcart_item_not_found(self):
+        """It should not Get a Shopcart item thats not found"""
+        test_shopcart = self._create_shopcarts(1)[0]
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.put(
+            f"{BASE_URL}/{test_shopcart.customer_id}", json=new_list
+        )
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("was not found", data["message"])
+
+    # ----------------------------------------------------------
     # TEST LIST ALL SHOPCARTS
     # ----------------------------------------------------------
     def test_get_all_shopcart(self):
