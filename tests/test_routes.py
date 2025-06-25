@@ -32,6 +32,7 @@ DATABASE_URI = os.getenv(
 )
 BASE_URL = "/shopcarts"
 
+
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -63,7 +64,7 @@ class TestShopcartService(TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
-    
+
     ############################################################
     # Utility function to bulk create shopcarts
     ############################################################
@@ -74,7 +75,9 @@ class TestShopcartService(TestCase):
             test_shopcart = ShopcartFactory()
             response = self.client.post(BASE_URL, json=test_shopcart.serialize())
             self.assertEqual(
-                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test shopcart",
             )
             new_shopcart = response.get_json()
             test_shopcart.id = new_shopcart["id"]
@@ -91,7 +94,9 @@ class TestShopcartService(TestCase):
             test_shopcart = ShopcartFactory()
             response = self.client.post(BASE_URL, json=test_shopcart.serialize())
             self.assertEqual(
-                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test shopcart",
             )
             new_shopcart = response.get_json()
             test_shopcart.id = new_shopcart["id"]
@@ -125,9 +130,32 @@ class TestShopcartService(TestCase):
         # Check the data is correct
         new_shopcart = response.get_json()
 
-        # Todo: uncomment when shopcart database model is implemented
+        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+
+        # Todo: uncomment when get_shopcarts is implemented
+        # # Check that the location header was correct
+        # response = self.client.get(location)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # new_shopcart = response.get_json()
         # self.assertEqual(new_shopcart["id"], test_shopcart.id)
         # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+
+    def test_create_shopcart_subordinate(self):
+        test_shopcart = ShopcartFactory()
+        logging.debug("Test Shopcart: %s", test_shopcart.serialize())
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = response.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        new_shopcart = response.get_json()
+
+        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Todo: uncomment when get_shopcarts is implemented
         # # Check that the location header was correct
@@ -156,8 +184,8 @@ class TestShopcartService(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
-        
-    #-----------------------------------------------------------
+
+    # -----------------------------------------------------------
     # TEST DELETE SHOPCART
     # ----------------------------------------------------------
     def test_delete_shopcart(self):
@@ -193,7 +221,9 @@ class TestShopcartService(TestCase):
         logging.debug(new_shopcart)
         # Todo: update name to item_list upon model completion
         new_shopcart["name"] = "unknown"
-        response = self.client.put(f"{BASE_URL}/{new_shopcart['id']}", json=new_shopcart)
+        response = self.client.put(
+            f"{BASE_URL}/{new_shopcart['id']}", json=new_shopcart
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_shopcart = response.get_json()
         # Todo: update name to item_list upon model completion
