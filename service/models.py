@@ -117,10 +117,10 @@ class Shopcart(db.Model):
         """Removes a Shopcart from the data store"""
         logger.info("Deleting shopcart for customer %s", customer_id)
         try:
-            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart = self.find(customer_id)
             newlist = []
             for item in cart.item_list:
-                if item.product_id == product_id:
+                if item["product_id"] == product_id:
                     continue
                 newlist.append(item)
 
