@@ -133,13 +133,12 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["id"], test_shopcart.id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
-        # Todo: uncomment when get_shopcarts is implemented
-        # # Check that the location header was correct
-        # response = self.client.get(location)
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # new_shopcart = response.get_json()
-        # self.assertEqual(new_shopcart["id"], test_shopcart.id)
-        # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        # Check that the location header was correct
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_shopcart = response.get_json()
+        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     def test_create_shopcart_subordinate(self):
         test_shopcart = ShopcartFactory()
@@ -157,13 +156,12 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["id"], test_shopcart.id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
-        # Todo: uncomment when get_shopcarts is implemented
-        # # Check that the location header was correct
-        # response = self.client.get(location)
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # new_shopcart = response.get_json()
-        # self.assertEqual(new_shopcart["id"], test_shopcart.id)
-        # self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        # Check that the location header was correct
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_shopcart = response.get_json()
+        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     # ----------------------------------------------------------
     # TEST READ SHOPCART
@@ -195,10 +193,9 @@ class TestShopcartService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
 
-        # Todo: uncomment when get_shopcart is merged
-        # # make sure they are deleted
-        # response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
-        # self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # make sure they are deleted
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_non_existing_shopcart(self):
         """It should Delete a Shopcart even if it doesn't exist"""
