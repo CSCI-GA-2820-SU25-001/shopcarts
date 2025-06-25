@@ -139,7 +139,7 @@ class TestShopcartService(TestCase):
         response = self.client.post(
             f"{BASE_URL}/{customer_id}/items",
             json=new_item,
-            content_type="application/json"
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -149,7 +149,9 @@ class TestShopcartService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
         self.assertEqual(new_shopcart["customer_id"], customer_id)
-        self.assertEqual(new_shopcart["item_list"][0]["product_id"], new_item["product_id"])
+        self.assertEqual(
+            new_shopcart["item_list"][0]["product_id"], new_item["product_id"]
+        )
 
     # ----------------------------------------------------------
     # TEST READ SHOPCART
@@ -190,6 +192,31 @@ class TestShopcartService(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("No user has any active shopcarts", data["message"])
+
+    # ----------------------------------------------------------
+    # TEST LIST ALL SHOPCART ITEMS
+    # ----------------------------------------------------------
+    def test_get_all_shopcart_items(self):
+        """It should Get all Shopcart item lists"""
+        test_cart = self._create_shopcarts(1)[0]
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.put(f"{BASE_URL}/{test_cart.customer_id}", json=new_list)
+        response = self.client.get(f"{BASE_URL}/{test_cart.customer_id}/items")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data, new_list)
+
+    def test_get_all_shopcart_items_not_found(self):
+        """It should not Get a Shopcart items_list thats not found"""
+        test_cart = self._create_shopcarts(1)[0]
+        response = self.client.get(f"{BASE_URL}/{test_cart.customer_id}/items")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("User has no shop cart available", data["message"])
 
     # -----------------------------------------------------------
     # TEST DELETE SHOPCART
