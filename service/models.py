@@ -55,17 +55,13 @@ class Shopcart(db.Model):
         """
         Creates an item to the Shopcart item_list
         """
-        logger.info(
-            "Creating product %d for %d 's shopcart", data["product_id"], customer_id
-        )
         try:
+            logger.info(
+                "Creating product %d for %d 's shopcart", data["product_id"], customer_id
+            )
             cart = self.find(customer_id)
-            print(cart.item_list, "111111")
-            print(data, "333333")
             cart.item_list.append(data)
-            print(cart.item_list, "444444")
             db.session.commit()
-            print(cart.item_list, "222222")
         except Exception as e:
             db.session.rollback()
             logger.error(

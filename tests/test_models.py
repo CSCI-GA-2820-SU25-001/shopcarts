@@ -76,6 +76,24 @@ class TestShopcart(TestCase):
         data = Shopcart.find(resource.customer_id)
         self.assertEqual(data.customer_id, resource.customer_id)
 
+    def test_create_item(self):
+        """It should create a Item"""
+        resource = ShopcartFactory()
+        resource.create()
+        self.assertIsNotNone(resource.id)
+        found = Shopcart.all()
+        self.assertEqual(len(found), 1)
+        data = Shopcart.find(resource.customer_id)
+        self.assertEqual(data.customer_id, resource.customer_id)
+        new_item = {
+            "product_id": 1,
+            "description": "Banana",
+            "price": 100,
+            "quantity": 2,
+        }
+        resource.create_subordinate(resource.customer_id, new_item)
+
+
     def test_delete(self):
         """It should delete created shopcart"""
         resource = ShopcartFactory()
@@ -109,7 +127,6 @@ class TestShopcart(TestCase):
         data = {"item_list": []}  # missing customer_id
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
-
     # ----------------------------------------------------------
     # Sad Delete Item test.
     # ----------------------------------------------------------
@@ -166,3 +183,5 @@ class TestShopcart(TestCase):
         self.assertEqual(data.customer_id, resource.customer_id)
         new_item = 2
         self.assertRaises(DataValidationError, resource.create_subordinate, resource.customer_id, new_item)
+
+    
