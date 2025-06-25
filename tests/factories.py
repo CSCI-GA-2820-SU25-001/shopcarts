@@ -15,6 +15,5 @@ class ShopcartFactory(factory.Factory):
         model = Shopcart
 
     id = factory.Sequence(lambda n: n)
-    name = factory.Faker("first_name")
-
-    # Todo: Add your other attributes here...
+    customer_id = factory.Sequence(lambda n: n)
+    item_list = []

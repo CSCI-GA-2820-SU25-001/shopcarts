@@ -5,7 +5,6 @@ All of the models are stored in this module
 """
 
 import logging
-from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -54,27 +53,46 @@ class Shopcart(db.Model):
         Creates an item to the Shopcart item_list
         """
         logger.info(
-            "Creating product %d for %d 's shopcart", data.product_id, self.customer_id
+            "Creating product %d for %d 's shopcart", data.product_id, customer_id
         )
         try:
-            self.deserialize(
-                db.session.query(self).filter_by(customer_id=customer_id).first()
-            )
-            self.item_list.append(data)
+            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart.item_list.append(data)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             logger.error(
-                "Error creating record for customer %d : %s", self.customer_id, data
+                "Error creating record for customer %d : %s", customer_id, data
             )
             raise DataValidationError(e) from e
 
-    def update(self):
+    def update(self, customer_id, data):
         """
-        Updates a Shopcart to the database
+        Updates a Shopcart of a customer in the database
         """
-        logger.info("Saving shopcart for %d", self.customer_id)
+        logger.info("Updating shopcart for %d", customer_id)
         try:
+            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart.item_list = data
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Error updating record: %s", self)
+            raise DataValidationError(e) from e
+
+    def update_subordinate(self, customer_id, data):
+        """
+        Updates a Shopcart item of a customer in the database
+        """
+        logger.info("Updating shopcart item %d for %d", data.product_id, customer_id)
+        try:
+            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            newlist = []
+            for item in cart.item_list:
+                if item.product_id == data.product_id:
+                    item = data
+                newlist.append(item)
+            cart.item_list = newlist
             db.session.commit()
         except Exception as e:
             db.session.rollback()
@@ -83,7 +101,7 @@ class Shopcart(db.Model):
 
     def delete(self):
         """Removes a Shopcart from the data store"""
-        logger.info("Deleting shopcart for %s", self.customer_id)
+        logger.info("Deleting shopcart for customer %s", self.customer_id)
         try:
             db.session.delete(self)
             db.session.commit()
@@ -94,7 +112,11 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """Serializes a Shopcart into a dictionary"""
-        return {"customer_id": self.customer_id, "item_list": self.item_list}
+        return {
+            "id": self.id,
+            "customer_id": self.customer_id,
+            "item_list": self.item_list,
+        }
 
     def deserialize(self, data):
         """
@@ -104,6 +126,7 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
+            self.id = data["id"]
             self.customer_id = data["customer_id"]
             self.item_list = data["item_list"]
         except AttributeError as error:

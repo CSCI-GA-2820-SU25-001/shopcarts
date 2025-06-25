@@ -84,25 +84,6 @@ class TestShopcartService(TestCase):
             shopcarts.append(test_shopcart)
         return shopcarts
 
-    ############################################################
-    # Utility function to bulk create shopcarts
-    ############################################################
-    def _create_shopcarts(self, count: int = 1) -> list:
-        """Factory method to create shopcarts in bulk"""
-        shopcarts = []
-        for _ in range(count):
-            test_shopcart = ShopcartFactory()
-            response = self.client.post(BASE_URL, json=test_shopcart.serialize())
-            self.assertEqual(
-                response.status_code,
-                status.HTTP_201_CREATED,
-                "Could not create test shopcart",
-            )
-            new_shopcart = response.get_json()
-            test_shopcart.id = new_shopcart["id"]
-            shopcarts.append(test_shopcart)
-        return shopcarts
-
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -216,12 +197,54 @@ class TestShopcartService(TestCase):
         # update the shopcart
         new_shopcart = response.get_json()
         logging.debug(new_shopcart)
-        # Todo: update name to item_list upon model completion
-        new_shopcart["name"] = "unknown"
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
         response = self.client.put(
-            f"{BASE_URL}/{new_shopcart['id']}", json=new_shopcart
+            f"{BASE_URL}/{new_shopcart['customer_id']}", json=new_list
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_shopcart = response.get_json()
-        # Todo: update name to item_list upon model completion
-        self.assertEqual(updated_shopcart["name"], "unknown")
+        self.assertEqual(updated_shopcart["item_list"], new_list)
+
+    # ----------------------------------------------------------
+    # TEST UPDATE SHOPCART INDIVIDUAL ITEM
+    # ----------------------------------------------------------
+    def test_update_shopcart_subordinate(self):
+        """It should Update an existing Shopcart item"""
+        # create a shopcart to update
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # update the shopcart
+        new_shopcart = response.get_json()
+        logging.debug(new_shopcart)
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.put(
+            f"{BASE_URL}/{new_shopcart['customer_id']}", json=new_list
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_shopcart = response.get_json()
+        self.assertEqual(updated_shopcart["item_list"], new_list)
+
+        # update the shopcart item
+        logging.debug(new_shopcart)
+        new_list_item = {
+            "product_id": 1,
+            "description": "Bad item",
+            "price": 20,
+            "quantity": 5,
+        }
+        temp_list = updated_shopcart.items_list.append(new_list_item)
+        response = self.client.put(
+            f"{BASE_URL}/{updated_shopcart['customer_id']}/items/{new_list_item['product_id']}",
+            json=new_list_item,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_shopcart = response.get_json()
+        self.assertEqual(updated_shopcart["item_list"], temp_list)
