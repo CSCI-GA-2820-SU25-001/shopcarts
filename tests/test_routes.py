@@ -296,9 +296,6 @@ class TestShopcartService(TestCase):
         logging.debug(loc)
         response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        new_list = [
-            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
-        ]
         # make sure they are deleted
         response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -397,8 +394,10 @@ class TestShopcartService(TestCase):
         """Invalid data raises error"""
         response = self.client.post(f"{BASE_URL}")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-    
+
     def test_invalid_path(self):
         """Invalid path raises error"""
-        response = self.client.post(f"{BASE_URL}", data="", content_type="application/json")
+        response = self.client.post(
+            f"{BASE_URL}", data="", content_type="application/json"
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

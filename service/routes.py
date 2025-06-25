@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Shopcart
 """
 
-from flask import jsonify, request, url_for, abort, json
+from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
@@ -126,7 +126,7 @@ def get_all_shopcarts():
     if not shopcart:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"No user has any active shopcarts",
+            "No user has any active shopcarts",
         )
 
     app.logger.info("Returning shopcarts: %s", shopcart)
@@ -150,7 +150,7 @@ def get_all_shopcarts_items(customer_id):
     if not shopcart or len(shopcart.item_list) == 0:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"User has no shop cart available",
+            "User has no shop cart available",
         )
 
     app.logger.info("Returning shopcart items: %s", shopcart)
