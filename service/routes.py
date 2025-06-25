@@ -326,7 +326,7 @@ def update_shopcarts(customer_id):
 ######################################################################
 # UPDATE INDIVIDUAL ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:product_id>", methods=["PUT"])
+@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["PUT"])
 def update_shopcarts_item(customer_id, product_id):
     """
     Update a Shopcart
@@ -353,7 +353,7 @@ def update_shopcarts_item(customer_id, product_id):
     app.logger.info("Processing: %s", data)
 
     # Save the updates to the database
-    shopcart.update_subordinate()
+    shopcart.update_subordinate(customer_id, data)
 
     app.logger.info("Shopcart for customer %d updated.", customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK

@@ -86,14 +86,15 @@ class Shopcart(db.Model):
         """
         Updates a Shopcart item of a customer in the database
         """
-        logger.info("Updating shopcart item %d for %d", data.product_id, customer_id)
+        logger.info("Updating shopcart item %d for %d", data["product_id"], customer_id)
         try:
-            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart = self.find(customer_id)
             newlist = []
             for item in cart.item_list:
-                if item.product_id == data.product_id:
-                    item = data
-                newlist.append(item)
+                if item["product_id"] == data["product_id"]:
+                    newlist.append(data)
+                else:
+                    newlist.append(item)
             cart.item_list = newlist
             db.session.commit()
         except Exception as e:

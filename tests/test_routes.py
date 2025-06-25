@@ -267,11 +267,25 @@ class TestShopcartService(TestCase):
             "price": 20,
             "quantity": 5,
         }
-        temp_list = updated_shopcart["items_list"].append(new_list_item)
         response = self.client.put(
             f"{BASE_URL}/{updated_shopcart['customer_id']}/items/{new_list_item['product_id']}",
             json=new_list_item,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        updated_shopcart = response.get_json()
-        self.assertEqual(updated_shopcart["item_list"], temp_list)
+        updated_shopcart_2 = response.get_json()
+        logging.debug(updated_shopcart_2["item_list"])
+        expected = [
+            {
+                "product_id": 1,
+                "description": "Bad item",
+                "price": 20,
+                "quantity": 5,
+            },
+            {
+                "product_id": 2, 
+                "description": "Item 2", 
+                "price": 240, 
+                "quantity": 5}
+
+        ]
+        self.assertEqual(updated_shopcart_2["item_list"], expected)
