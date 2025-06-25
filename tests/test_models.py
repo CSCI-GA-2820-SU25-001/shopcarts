@@ -127,13 +127,47 @@ class TestShopcart(TestCase):
         data = {"item_list": []}  # missing customer_id
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+    def test_deserialize_missing_key(self):
+        """It should raise DataValidationError if a required key is missing"""
+        bad_data = {
+            "id": 1,
+            # "customer_id" is missing
+            "item_list": []
+        }
+        shopcart = Shopcart()
+        with self.assertRaises(DataValidationError) as context:
+            shopcart.deserialize(bad_data)
+        self.assertIn("missing customer_id", str(context.exception))
+
+
     # ----------------------------------------------------------
-    # Sad Delete Item test.
+    # Sad Delete Item test. (shopcart exist check)
     # ----------------------------------------------------------
     def test_delete_subordinate_invalid(self):
         """It should raise DataValidationError when deleting an item from a nonexistent cart"""
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.delete_subordinate, 9999, 123)
+
+    # ----------------------------------------------------------
+    # Delete correct Item test.
+    # ----------------------------------------------------------
+    def test_delete_subordinate_removes_correct_item(self):
+        """It should delete the correct item from item_list"""
+        shopcart = ShopcartFactory()
+        shopcart.create()
+
+        # Add two items manually
+        shopcart.item_list = [
+            {"product_id": 1, "description": "apple", "price": 10, "quantity": 2},
+            {"product_id": 2, "description": "banana", "price": 20, "quantity": 1}
+        ]
+        db.session.commit()
+        # Now delete product_id 1
+        shopcart.delete_subordinate(shopcart.customer_id, 1)
+        updated = Shopcart.find(shopcart.customer_id)
+        self.assertEqual(len(updated.item_list), 1)
+        self.assertEqual(updated.item_list[0]["product_id"], 2)
 
     # ----------------------------------------------------------
     # Sad Delete shopcart test
@@ -153,6 +187,7 @@ class TestShopcart(TestCase):
             {"product_id": 1, "description": "Item", "price": 50, "quantity": 1}
         ]
         self.assertRaises(DataValidationError, shopcart.update, 9999, updated_data)
+
 
     # ----------------------------------------------------------
     # Sad Update item test (shopcart does not exist)
@@ -184,4 +219,13 @@ class TestShopcart(TestCase):
         new_item = 2
         self.assertRaises(DataValidationError, resource.create_subordinate, resource.customer_id, new_item)
 
-    
+    # ----------------------------------------------------------
+    # Sad save tests 
+    # -----------------------------------------------------------
+    def test_save_class_method(self):
+        """It should call save() to commit changes"""
+        shopcart = ShopcartFactory()
+        shopcart.create()
+        Shopcart.save()
+        found = Shopcart.find(shopcart.customer_id)
+        self.assertIsNotNone(found)
