@@ -60,12 +60,8 @@ class Shopcart(db.Model):
         )
         try:
             cart = self.find(customer_id)
-            print(cart.item_list, "111111")
-            print(data, "333333")
             cart.item_list.append(data)
-            print(cart.item_list, "444444")
             db.session.commit()
-            print(cart.item_list, "222222")
         except Exception as e:
             db.session.rollback()
             logger.error(

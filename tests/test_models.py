@@ -110,7 +110,8 @@ class TestShopcart(TestCase):
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
-    
-    
-
-    
+    def test_error_creating_shopcart(self):
+        """Raises a DataValidationError if invalid input on create"""
+        shopcart = Shopcart()
+        shopcart.customer_id = "error"
+        self.assertRaises(DataValidationError, shopcart.create)
