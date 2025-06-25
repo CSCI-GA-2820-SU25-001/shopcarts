@@ -383,3 +383,22 @@ class TestShopcartService(TestCase):
             {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
         ]
         self.assertEqual(updated_shopcart_2["item_list"], expected)
+
+    # ----------------------------------------------------------
+    # TEST SAD PATH
+    # ----------------------------------------------------------
+
+    def test_invalid_method(self):
+        """Invalid method raises error"""
+        response = self.client.delete(f"{BASE_URL}")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_invalid_media(self):
+        """Invalid data raises error"""
+        response = self.client.post(f"{BASE_URL}")
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    
+    def test_invalid_path(self):
+        """Invalid path raises error"""
+        response = self.client.post(f"{BASE_URL}", data="", content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
