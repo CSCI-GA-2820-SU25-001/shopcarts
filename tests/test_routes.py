@@ -80,7 +80,7 @@ class TestShopcartService(TestCase):
                 "Could not create test shopcart",
             )
             new_shopcart = response.get_json()
-            test_shopcart.id = new_shopcart["id"]
+            test_shopcart.customer_id = new_shopcart["customer_id"]
             shopcarts.append(test_shopcart)
         return shopcarts
 
@@ -111,38 +111,45 @@ class TestShopcartService(TestCase):
         # Check the data is correct
         new_shopcart = response.get_json()
 
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
-        response = self.client.get(location)
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     def test_create_shopcart_subordinate(self):
+        """It should Create a new Shopcart Item"""
         test_shopcart = ShopcartFactory()
         logging.debug("Test Shopcart: %s", test_shopcart.serialize())
         response = self.client.post(BASE_URL, json=test_shopcart.serialize())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        # Make sure location header is set
-        location = response.headers.get("Location", None)
-        self.assertIsNotNone(location)
+        customer_id = test_shopcart.customer_id
+        new_item = {
+            "product_id": 1,
+            "description": "Banana",
+            "price": 100,
+            "quantity": 2,
+        }
 
-        # Check the data is correct
-        new_shopcart = response.get_json()
+        response = self.client.post(
+            f"{BASE_URL}/{customer_id}/items",
+            json=new_item,
+            content_type="application/json"
+        )
 
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
-        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Check that the location header was correct
-        response = self.client.get(location)
+        response = self.client.get(f"{BASE_URL}/{customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
-        self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
+        self.assertEqual(new_shopcart["customer_id"], customer_id)
+        self.assertEqual(new_shopcart["item_list"][0]["product_id"], new_item["product_id"])
 
     # ----------------------------------------------------------
     # TEST READ SHOPCART
@@ -151,10 +158,10 @@ class TestShopcartService(TestCase):
         """It should Get a single Shopcart"""
         # get the id of a shopcart
         test_shopcart = self._create_shopcarts(1)[0]
-        response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        self.assertEqual(data["id"], test_shopcart.id)
+        self.assertEqual(data["customer_id"], test_shopcart.customer_id)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
@@ -188,12 +195,15 @@ class TestShopcartService(TestCase):
     # TEST DELETE SHOPCART ITEM
     # ----------------------------------------------------------
     def test_delete_shopcart_subordinate(self):
-        """It should Delete a Shopcart"""
+        """It should Delete a Shopcart Item"""
         test_shopcart = self._create_shopcarts(1)[0]
         test_shopcart.item_list = [
             {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
             {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
         ]
+        db.session.commit()
+        loc = f"{BASE_URL}/{test_shopcart.customer_id}/items/1"
+        logging.debug(loc)
         response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         new_list = [
@@ -201,12 +211,12 @@ class TestShopcartService(TestCase):
         ]
         # make sure they are deleted
         response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
-        self.assertEqual(response.get_json().item_list, new_list)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_non_existing_shopcart_subordinate(self):
-        """It should Delete a Shopcart even if it doesn't exist"""
+        """It should Delete a Shopcart Item even if it doesn't exist"""
         test_shopcart = self._create_shopcarts(1)[0]
-        response = self.client.delete(f"{BASE_URL}{test_shopcart.customer_id}/items/0")
+        response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
 
@@ -266,11 +276,25 @@ class TestShopcartService(TestCase):
             "price": 20,
             "quantity": 5,
         }
-        temp_list = updated_shopcart.items_list.append(new_list_item)
         response = self.client.put(
             f"{BASE_URL}/{updated_shopcart['customer_id']}/items/{new_list_item['product_id']}",
             json=new_list_item,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        updated_shopcart = response.get_json()
-        self.assertEqual(updated_shopcart["item_list"], temp_list)
+        updated_shopcart_2 = response.get_json()
+        logging.debug(updated_shopcart_2["item_list"])
+        expected = [
+            {
+                "product_id": 1,
+                "description": "Bad item",
+                "price": 20,
+                "quantity": 5,
+            },
+            {
+                "product_id": 2, 
+                "description": "Item 2", 
+                "price": 240, 
+                "quantity": 5}
+
+        ]
+        self.assertEqual(updated_shopcart_2["item_list"], expected)

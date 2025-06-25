@@ -79,8 +79,8 @@ def create_shopcarts():
 ######################################################################
 # CREATE A NEW ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["POST"])
-def create_shopcarts_item(customer_id, product_id):
+@app.route("/shopcarts/<int:customer_id>/items", methods=["POST"])
+def create_shopcarts_item(customer_id):
     """
     Create a Shopcart item
     This endpoint will create a Shopcart item based the data in the body that is posted
@@ -95,7 +95,7 @@ def create_shopcarts_item(customer_id, product_id):
 
     # Save the new Shopcart to the database
     shopcart.create_subordinate(customer_id, data)
-    app.logger.info("Shopcart item with new id [%d] saved!", product_id)
+    app.logger.info("Shopcart item with new id saved!")
 
     # Return the location of the new Shopcart
 
@@ -130,7 +130,7 @@ def get_all_shopcarts():
         )
 
     app.logger.info("Returning shopcarts: %s", shopcart)
-    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+    return jsonify(shopcart), status.HTTP_200_OK
 
 
 ######################################################################
@@ -168,7 +168,6 @@ def get_shopcarts(customer_id):
     This endpoint will return a Shopcart based on it's id
     """
     app.logger.info("Request to Retrieve a shopcart with customer id [%s]", customer_id)
-
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.find(customer_id)
     if not shopcart:
@@ -200,7 +199,7 @@ def get_shopcarts_item(customer_id, product_id):
             status.HTTP_404_NOT_FOUND,
             f"Shopcart for customer '{customer_id}' was not found.",
         )
-    item_list = shopcart["item_list"]
+    item_list = shopcart.item_list
     for item in item_list:
         if item.product_id == product_id:
             app.logger.info("Returning shopcart: %s", shopcart.customer_id)
@@ -210,34 +209,6 @@ def get_shopcarts_item(customer_id, product_id):
         status.HTTP_404_NOT_FOUND,
         f"Product '{product_id}' was not found in cart.",
     )
-
-
-######################################################################
-# DELETE A SHOPCART
-######################################################################
-@app.route("/shopcarts/<int:customer_id>", methods=["DELETE"])
-def delete_shopcarts(customer_id):
-    """
-    Delete a Shopcart
-
-    This endpoint will delete a Shopcart based the id specified in the path
-    """
-    app.logger.info("Request to Delete a shopcart with id [%d]", customer_id)
-
-    # Delete the Shopcart if it exists
-    shopcart = Shopcart.find(customer_id)
-    if shopcart:
-        app.logger.info("Shopcart for customer: %d found.", shopcart.id)
-        shopcart.delete()
-    else:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Shopcart for customer '{customer_id}' was not found to delete.",
-        )
-
-    app.logger.info("Shopcart with customer ID: %d delete complete.", customer_id)
-    return {}, status.HTTP_204_NO_CONTENT
-
 
 ######################################################################
 # DELETE AN ITEM FROM SHOPCART
@@ -259,15 +230,37 @@ def delete_shopcarts_item(customer_id, product_id):
     shopcart = Shopcart.find(customer_id)
     if shopcart:
         app.logger.info("Shopcart for customer: %d found.", customer_id)
-        shopcart.delete_subordinate()
+        shopcart.delete_subordinate(customer_id, product_id)
     else:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Shopcart for customer '{customer_id}' was not found to delete.",
-        )
-
+        app.logger.info("Shopcart for customer: %d found.", customer_id)
     app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
+
+######################################################################
+# DELETE A SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:customer_id>", methods=["DELETE"])
+def delete_shopcarts(customer_id):
+    """
+    Delete a Shopcart
+
+    This endpoint will delete a Shopcart based the id specified in the path
+    """
+    app.logger.info("Request to Delete a shopcart with id [%d]", customer_id)
+
+    # Delete the Shopcart if it exists
+    shopcart = Shopcart.find(customer_id)
+    if shopcart:
+        app.logger.info("Shopcart for customer: %d found.", shopcart.id)
+        shopcart.delete()
+    else:
+        app.logger.info("Shopcart for customer: %d not found.", customer_id)
+
+    app.logger.info("Shopcart with customer ID: %d delete complete.", customer_id)
+    return {}, status.HTTP_204_NO_CONTENT
+
+
+
 
 
 ######################################################################
@@ -332,7 +325,7 @@ def update_shopcarts(customer_id):
 ######################################################################
 # UPDATE INDIVIDUAL ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:product_id>", methods=["PUT"])
+@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["PUT"])
 def update_shopcarts_item(customer_id, product_id):
     """
     Update a Shopcart
@@ -359,7 +352,7 @@ def update_shopcarts_item(customer_id, product_id):
     app.logger.info("Processing: %s", data)
 
     # Save the updates to the database
-    shopcart.update_subordinate()
+    shopcart.update_subordinate(customer_id, data)
 
     app.logger.info("Shopcart for customer %d updated.", customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
