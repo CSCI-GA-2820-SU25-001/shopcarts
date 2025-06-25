@@ -80,7 +80,7 @@ class TestShopcartService(TestCase):
                 "Could not create test shopcart",
             )
             new_shopcart = response.get_json()
-            test_shopcart.customer_id = new_shopcart["customer_id"]
+            test_shopcart.id = new_shopcart["id"]
             shopcarts.append(test_shopcart)
         return shopcarts
 
@@ -115,7 +115,7 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
-        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")        
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
         self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
@@ -170,6 +170,26 @@ class TestShopcartService(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
+
+    # ----------------------------------------------------------
+    # TEST LIST ALL SHOPCARTS
+    # ----------------------------------------------------------
+    def test_get_all_shopcart(self):
+        """It should Get all Shopcarts"""
+        set_carts = self._create_shopcarts(2)
+        set_carts = [i.serialize() for i in set_carts]
+        response = self.client.get(f"{BASE_URL}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data, set_carts)
+
+    def test_get_all_shopcart_not_found(self):
+        """It should not Get a Shopcart thats not found"""
+        response = self.client.get(f"{BASE_URL}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("No user has any active shopcarts", data["message"])
 
     # -----------------------------------------------------------
     # TEST DELETE SHOPCART
@@ -290,11 +310,6 @@ class TestShopcartService(TestCase):
                 "price": 20,
                 "quantity": 5,
             },
-            {
-                "product_id": 2, 
-                "description": "Item 2", 
-                "price": 240, 
-                "quantity": 5}
-
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
         ]
         self.assertEqual(updated_shopcart_2["item_list"], expected)

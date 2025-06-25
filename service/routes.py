@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Shopcart
 """
 
-from flask import jsonify, request, url_for, abort
+from flask import jsonify, request, url_for, abort, json
 from flask import current_app as app  # Import Flask application
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
@@ -34,7 +34,7 @@ from service.common import status  # HTTP Status Codes
 def index():
     """Root URL response"""
     return (
-        jsonify({"message": "Shopcart API is healthy"}),
+        jsonify({"message": "Shopcart API root url"}),
         status.HTTP_200_OK,
     )
 
@@ -130,7 +130,7 @@ def get_all_shopcarts():
         )
 
     app.logger.info("Returning shopcarts: %s", shopcart)
-    return jsonify(shopcart), status.HTTP_200_OK
+    return jsonify([x.serialize() for x in shopcart]), status.HTTP_200_OK
 
 
 ######################################################################
@@ -210,6 +210,7 @@ def get_shopcarts_item(customer_id, product_id):
         f"Product '{product_id}' was not found in cart.",
     )
 
+
 ######################################################################
 # DELETE AN ITEM FROM SHOPCART
 ######################################################################
@@ -236,6 +237,7 @@ def delete_shopcarts_item(customer_id, product_id):
     app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
 
+
 ######################################################################
 # DELETE A SHOPCART
 ######################################################################
@@ -258,9 +260,6 @@ def delete_shopcarts(customer_id):
 
     app.logger.info("Shopcart with customer ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
-
-
-
 
 
 ######################################################################
