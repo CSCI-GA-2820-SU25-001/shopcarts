@@ -35,6 +35,7 @@ DATABASE_URI = os.getenv(
 #  Shopcart   M O D E L   T E S T   C A S E S
 ######################################################################
 
+
 # pylint: disable=too-many-public-methods
 class TestShopcart(TestCase):
     """Test Cases for Shopcart Model"""
@@ -93,7 +94,6 @@ class TestShopcart(TestCase):
         }
         resource.create_subordinate(resource.customer_id, new_item)
 
-
     def test_delete(self):
         """It should delete created shopcart"""
         resource = ShopcartFactory()
@@ -118,7 +118,7 @@ class TestShopcart(TestCase):
         self.assertIsNone(found)
         found = Shopcart.find(44)
         self.assertEqual(len(found.all()), 1)
-    
+
     # ----------------------------------------------------------
     # Sad Data Validation test.
     # ----------------------------------------------------------
@@ -133,13 +133,12 @@ class TestShopcart(TestCase):
         bad_data = {
             "id": 1,
             # "customer_id" is missing
-            "item_list": []
+            "item_list": [],
         }
         shopcart = Shopcart()
         with self.assertRaises(DataValidationError) as context:
             shopcart.deserialize(bad_data)
         self.assertIn("missing customer_id", str(context.exception))
-
 
     # ----------------------------------------------------------
     # Sad Delete Item test. (shopcart exist check)
@@ -160,7 +159,7 @@ class TestShopcart(TestCase):
         # Add two items manually
         shopcart.item_list = [
             {"product_id": 1, "description": "apple", "price": 10, "quantity": 2},
-            {"product_id": 2, "description": "banana", "price": 20, "quantity": 1}
+            {"product_id": 2, "description": "banana", "price": 20, "quantity": 1},
         ]
         db.session.commit()
         # Now delete product_id 1
@@ -188,7 +187,6 @@ class TestShopcart(TestCase):
         ]
         self.assertRaises(DataValidationError, shopcart.update, 9999, updated_data)
 
-
     # ----------------------------------------------------------
     # Sad Update item test (shopcart does not exist)
     # -----------------------------------------------------------
@@ -196,17 +194,19 @@ class TestShopcart(TestCase):
         """It should raise DataValidationError when updating an item in nonexistent cart"""
         shopcart = Shopcart()
         new_item = {"product_id": 99, "description": "X", "price": 50, "quantity": 2}
-        self.assertRaises(DataValidationError, shopcart.update_subordinate, 9999, new_item)
+        self.assertRaises(
+            DataValidationError, shopcart.update_subordinate, 9999, new_item
+        )
 
     # ----------------------------------------------------------
-    # Sad create tests 
+    # Sad create tests
     # -----------------------------------------------------------
     def test_error_creating_shopcart(self):
         """Raises a DataValidationError if invalid input on create"""
         shopcart = Shopcart()
         shopcart.customer_id = "error"
         self.assertRaises(DataValidationError, shopcart.create)
-    
+
     def test_error_creating_item(self):
         """It should create a Item"""
         resource = ShopcartFactory()
@@ -217,10 +217,15 @@ class TestShopcart(TestCase):
         data = Shopcart.find(resource.customer_id)
         self.assertEqual(data.customer_id, resource.customer_id)
         new_item = 2
-        self.assertRaises(DataValidationError, resource.create_subordinate, resource.customer_id, new_item)
+        self.assertRaises(
+            DataValidationError,
+            resource.create_subordinate,
+            resource.customer_id,
+            new_item,
+        )
 
     # ----------------------------------------------------------
-    # Sad save tests 
+    # Sad save tests
     # -----------------------------------------------------------
     def test_save_class_method(self):
         """It should call save() to commit changes"""

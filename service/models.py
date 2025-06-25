@@ -57,7 +57,9 @@ class Shopcart(db.Model):
         """
         try:
             logger.info(
-                "Creating product %d for %d 's shopcart", data["product_id"], customer_id
+                "Creating product %d for %d 's shopcart",
+                data["product_id"],
+                customer_id,
             )
             cart = self.find(customer_id)
             cart.item_list.append(data)
@@ -172,13 +174,14 @@ class Shopcart(db.Model):
         """Returns all of the Shopcarts in the database"""
         logger.info("Processing all Shopcarts")
         return cls.query.all()
-        
+
     @classmethod
     def find(cls, by_id):
         """Finds a Shopcart by customer ID"""
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.filter_by(customer_id=by_id).first()
-    
+
     @classmethod
     def save(cls):
+        """Saves the model state"""
         db.session.commit()
