@@ -80,7 +80,7 @@ class TestShopcartService(TestCase):
                 "Could not create test shopcart",
             )
             new_shopcart = response.get_json()
-            test_shopcart.id = new_shopcart["id"]
+            test_shopcart.customer_id = new_shopcart["customer_id"]
             shopcarts.append(test_shopcart)
         return shopcarts
 
@@ -111,14 +111,14 @@ class TestShopcartService(TestCase):
         # Check the data is correct
         new_shopcart = response.get_json()
 
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     def test_create_shopcart_subordinate(self):
@@ -134,14 +134,14 @@ class TestShopcartService(TestCase):
         # Check the data is correct
         new_shopcart = response.get_json()
 
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
         # Check that the location header was correct
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_shopcart = response.get_json()
-        self.assertEqual(new_shopcart["id"], test_shopcart.id)
+        self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
     # ----------------------------------------------------------
@@ -151,10 +151,10 @@ class TestShopcartService(TestCase):
         """It should Get a single Shopcart"""
         # get the id of a shopcart
         test_shopcart = self._create_shopcarts(1)[0]
-        response = self.client.get(f"{BASE_URL}/{test_shopcart.id}")
+        response = self.client.get(f"{BASE_URL}/{test_shopcart.customer_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        self.assertEqual(data["id"], test_shopcart.id)
+        self.assertEqual(data["customer_id"], test_shopcart.customer_id)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
@@ -194,6 +194,7 @@ class TestShopcartService(TestCase):
             {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
             {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
         ]
+        db.session.commit()
         response = self.client.delete(f"{BASE_URL}/{test_shopcart.customer_id}/items/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         new_list = [
@@ -266,7 +267,7 @@ class TestShopcartService(TestCase):
             "price": 20,
             "quantity": 5,
         }
-        temp_list = updated_shopcart.items_list.append(new_list_item)
+        temp_list = updated_shopcart["items_list"].append(new_list_item)
         response = self.client.put(
             f"{BASE_URL}/{updated_shopcart['customer_id']}/items/{new_list_item['product_id']}",
             json=new_list_item,

@@ -74,7 +74,7 @@ class Shopcart(db.Model):
         """
         logger.info("Updating shopcart for %d", customer_id)
         try:
-            cart = db.session.query(self).filter_by(customer_id=customer_id).first()
+            cart = self.find(customer_id)
             cart.item_list = data
             db.session.commit()
         except Exception as e:

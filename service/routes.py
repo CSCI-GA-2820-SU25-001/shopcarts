@@ -230,10 +230,7 @@ def delete_shopcarts(customer_id):
         app.logger.info("Shopcart for customer: %d found.", shopcart.id)
         shopcart.delete()
     else:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Shopcart for customer '{customer_id}' was not found to delete.",
-        )
+        app.logger.info("Shopcart for customer: %d not found.", customer_id)
 
     app.logger.info("Shopcart with customer ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
@@ -259,12 +256,9 @@ def delete_shopcarts_item(customer_id, product_id):
     shopcart = Shopcart.find(customer_id)
     if shopcart:
         app.logger.info("Shopcart for customer: %d found.", customer_id)
-        shopcart.delete_subordinate()
+        shopcart.delete_subordinate(customer_id, product_id)
     else:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Shopcart for customer '{customer_id}' was not found to delete.",
-        )
+        app.logger.info("Shopcart for customer: %d found.", customer_id)
 
     app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
     return {}, status.HTTP_204_NO_CONTENT
