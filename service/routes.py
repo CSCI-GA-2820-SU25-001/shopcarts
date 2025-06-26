@@ -68,7 +68,7 @@ def create_shopcarts():
 
     # Return the location of the new Shopcart
 
-    location_url = url_for("create_shopcarts", shopcart_id=shopcart.id, _external=True)
+    location_url = url_for("create_shopcarts", _external=True)
     return (
         jsonify(shopcart.serialize()),
         status.HTTP_201_CREATED,
