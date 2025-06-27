@@ -149,7 +149,6 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.id = data["id"]
             self.customer_id = data["customer_id"]
             self.item_list = data["item_list"]
         except AttributeError as error:
