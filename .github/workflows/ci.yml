@@ -44,6 +44,6 @@ jobs:
       env:
         DATABASE_URI: postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/postgres
     - name: Upload Coverage Reports to codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5.4.3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
