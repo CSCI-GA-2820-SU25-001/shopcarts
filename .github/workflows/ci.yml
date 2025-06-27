@@ -36,6 +36,7 @@ jobs:
         pipenv install --system --dev
     - name: Linting
       run: |
+        sudo apt-get install git
         flake8 service tests --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 service tests --count --max-complexity=10 --max-line-length=127 --statistic
         pylint service tests --max-line-length=127
@@ -43,3 +44,7 @@ jobs:
       run: pytest --pspec --cov=service --cov-fail-under=95 --cov-report=xml
       env:
         DATABASE_URI: postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/postgres
+    - name: Upload Coverage Reports to codecov
+      uses: codecov/codecov-action@v5.4.3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
