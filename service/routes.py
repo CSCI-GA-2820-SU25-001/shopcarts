@@ -341,7 +341,6 @@ def clear_shopcarts(customer_id):
             f"Shopcart for customer '{customer_id}' was not found.",
         )
 
-
     # Save the updates to the database
     shopcart.update(customer_id, [])
 

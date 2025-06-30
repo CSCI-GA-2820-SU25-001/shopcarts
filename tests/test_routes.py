@@ -331,7 +331,6 @@ class TestShopcartService(TestCase):
         updated_shopcart = response.get_json()
         self.assertEqual(updated_shopcart["item_list"], new_list)
 
-
     # ----------------------------------------------------------
     # TEST UPDATE SHOPCART
     # ----------------------------------------------------------
@@ -356,20 +355,13 @@ class TestShopcartService(TestCase):
         updated_shopcart = response.get_json()
         self.assertEqual(updated_shopcart["item_list"], new_list)
 
-        response = self.client.put(
-            f"{BASE_URL}/{new_shopcart['customer_id']}/clear"
-        )
+        response = self.client.put(f"{BASE_URL}/{new_shopcart['customer_id']}/clear")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_shopcart = response.get_json()
         self.assertEqual(updated_shopcart["item_list"], [])
-    
-        response = self.client.put(
-            f"{BASE_URL}/555/clear"
-        )
+
+        response = self.client.put(f"{BASE_URL}/555/clear")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-        
-
 
     # ----------------------------------------------------------
     # TEST UPDATE SHOPCART INDIVIDUAL ITEM
