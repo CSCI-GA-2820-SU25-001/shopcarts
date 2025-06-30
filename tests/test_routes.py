@@ -252,13 +252,12 @@ class TestShopcartService(TestCase):
         self.assertEqual(data, new_list)
 
     def test_get_all_shopcart_items_not_found(self):
-        """It should not Get a Shopcart items_list thats not found"""
+        """It should empty list for no shopcart items"""
         test_cart = self._create_shopcarts(1)[0]
         response = self.client.get(f"{BASE_URL}/{test_cart.customer_id}/items")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        logging.debug("Response data = %s", data)
-        self.assertIn("User has no shop cart available", data["message"])
+        self.assertEqual(data, [])
 
     def test_get_all_shopcart_items_query_max_price(self):
         """It should Get all items in item list with lower price than query string"""
@@ -293,7 +292,7 @@ class TestShopcartService(TestCase):
             f"{BASE_URL}/{test_cart.customer_id}/items?max-price=100"
         )
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # -----------------------------------------------------------
     # TEST DELETE SHOPCART

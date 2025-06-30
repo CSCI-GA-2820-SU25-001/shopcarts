@@ -150,10 +150,7 @@ def get_all_shopcarts_items(customer_id):
         shopcart = Shopcart.find(customer_id).item_list
 
     if not shopcart:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            "User has no shop cart available",
-        )
+        return jsonify([]), status.HTTP_200_OK
 
     app.logger.info("Returning shopcart items: %s", shopcart)
     return jsonify(shopcart), status.HTTP_200_OK
