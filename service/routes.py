@@ -124,10 +124,7 @@ def get_all_shopcarts():
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.all()
     if not shopcart:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            "No user has any active shopcarts",
-        )
+        return jsonify([]), status.HTTP_200_OK
 
     app.logger.info("Returning shopcarts: %s", shopcart)
     return jsonify([x.serialize() for x in shopcart]), status.HTTP_200_OK
