@@ -327,6 +327,33 @@ def update_shopcarts(customer_id):
 
 
 ######################################################################
+# CLEAR AN EXISTING SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:customer_id>/clear", methods=["PUT"])
+def clear_shopcarts(customer_id):
+    """
+    Update a Shopcart
+
+    This endpoint will clear a Shopcart of items
+    """
+    app.logger.info("Request to clear a shopcart for customer [%d]", customer_id)
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(customer_id)
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart for customer '{customer_id}' was not found.",
+        )
+
+    # Save the updates to the database
+    shopcart.update(customer_id, [])
+
+    app.logger.info("Shopcart for customer %d cleared.", customer_id)
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
 # UPDATE INDIVIDUAL ITEM IN SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["PUT"])
