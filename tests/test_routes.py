@@ -229,12 +229,11 @@ class TestShopcartService(TestCase):
         self.assertEqual(data, set_carts)
 
     def test_get_all_shopcart_not_found(self):
-        """It should not Get a Shopcart thats not found"""
+        """It should empty list for no shopcarts"""
         response = self.client.get(f"{BASE_URL}")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        logging.debug("Response data = %s", data)
-        self.assertIn("No user has any active shopcarts", data["message"])
+        self.assertEqual(data, [])
 
     # ----------------------------------------------------------
     # TEST LIST ALL SHOPCART ITEMS
