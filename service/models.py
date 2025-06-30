@@ -181,6 +181,19 @@ class Shopcart(db.Model):
         return cls.query.filter_by(customer_id=by_id).first()
 
     @classmethod
+    def find_filtered(cls, by_id, by_price):
+        """Returns all of the items in shopcart item_list filtered by max_price"""
+        logger.info("Processing all Shopcarts")
+        cart = cls.query.filter_by(customer_id=by_id).first()
+        out = []
+        if cart is None:
+            return None
+        for item in cart.item_list:
+            if int(item["price"]) <= int(by_price):
+                out.append(item)
+        return out
+
+    @classmethod
     def save(cls):
         """Saves the model state"""
         db.session.commit()

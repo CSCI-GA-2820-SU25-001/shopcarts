@@ -261,6 +261,41 @@ class TestShopcartService(TestCase):
         logging.debug("Response data = %s", data)
         self.assertIn("User has no shop cart available", data["message"])
 
+    def test_get_all_shopcart_items_query_max_price(self):
+        """It should Get all items in item list with lower price than query string"""
+        test_cart = self._create_shopcarts(1)[0]
+        test_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+            {"product_id": 3, "description": "Item 3", "price": 320, "quantity": 6},
+            {"product_id": 4, "description": "Item 4", "price": 347, "quantity": 3},
+        ]
+        response = self.client.put(f"{BASE_URL}/{test_cart.customer_id}", json=new_list)
+        response = self.client.get(
+            f"{BASE_URL}/{test_cart.customer_id}/items?max-price=300"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        filtered_shopcart = response.get_json()
+        self.assertEqual(filtered_shopcart, test_list)
+
+    def test_get_all_shopcart_items_query_max_price_not_found(self):
+        """It should not get any items if none meet the max price criteria"""
+        test_cart = self._create_shopcarts(1)[0]
+        new_list = [
+            {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2},
+            {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5},
+        ]
+        response = self.client.put(f"{BASE_URL}/{test_cart.customer_id}", json=new_list)
+        response = self.client.get(
+            f"{BASE_URL}/{test_cart.customer_id}/items?max-price=100"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     # -----------------------------------------------------------
     # TEST DELETE SHOPCART
     # ----------------------------------------------------------
