@@ -260,7 +260,6 @@ class TestShopcartService(TestCase):
         data = response.get_json()
         self.assertEqual(data, [])
 
-
     def test_get_all_shopcart_items_query_max_price(self):
         """It should Get all items in item list with lower price than query string"""
         test_cart = self._create_shopcarts(1)[0]
