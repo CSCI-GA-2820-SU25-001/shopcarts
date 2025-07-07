@@ -121,6 +121,15 @@ class TestShopcartService(TestCase):
         self.assertEqual(new_shopcart["customer_id"], test_shopcart.customer_id)
         self.assertEqual(new_shopcart["item_list"], test_shopcart.item_list)
 
+    def test_create_duplicate_shopcart(self):
+        """It should fail to create a new Shopcart for a customer if it already exists"""
+        test_shopcart = ShopcartFactory()
+        logging.debug("Test Shopcart: %s", test_shopcart.serialize())
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
     def test_create_shopcart_subordinate(self):
         """It should Create a new Shopcart Item"""
         test_shopcart = ShopcartFactory()

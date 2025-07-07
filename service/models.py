@@ -28,7 +28,7 @@ class Shopcart(db.Model):
     # Table Schema
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer)
+    customer_id = db.Column(db.Integer, unique=True)
     item_list = db.Column(MutableList.as_mutable(JSONB), default=list)
 
     def __repr__(self):
