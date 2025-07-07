@@ -8,6 +8,7 @@ import logging
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm import validates
 from sqlalchemy.orm.attributes import flag_modified
 
 logger = logging.getLogger("flask.app")
@@ -32,6 +33,37 @@ class Shopcart(db.Model):
     customer_id = db.Column(db.Integer, unique=True)
     item_list = db.Column(MutableList.as_mutable(JSONB), default=list)
 
+    @validates("item_list")
+    def validate_item_list(self, key, value):
+        """
+        Validates sub-fields of item_list JSONB Array
+        """
+        logger.info("Item List key %s:", key)
+        if not isinstance(value, list):
+            raise DataValidationError(
+                Exception("Column 'item_list' must be of type: List []")
+            )
+
+        for item in value:
+            if "product_id" not in item or not isinstance(item["product_id"], int):
+                raise DataValidationError(
+                    Exception("Field 'product_id' of type: Integer expected")
+                )
+            if "description" not in item or not isinstance(item["description"], str):
+                raise DataValidationError(
+                    Exception("Field 'description' of type: String expected")
+                )
+            if "price" not in item or not isinstance(item["price"], int):
+                raise DataValidationError(
+                    Exception("Field 'price' of type: Integer expected")
+                )
+            if "quantity" not in item or not isinstance(item["quantity"], int):
+                raise DataValidationError(
+                    Exception("Field 'quantity' of type: Integer expected")
+                )
+
+        return value
+
     def __repr__(self):
         return f"<Shopcart {self.customer_id} item_list={self.item_list}>"
 
@@ -43,7 +75,6 @@ class Shopcart(db.Model):
             self.customer_id = 33
         logger.info("Creating shopcart for %d", self.customer_id)
         self.id = None  # pylint: disable=invalid-name
-        self.item_list = []
         try:
             db.session.add(self)
             db.session.commit()
