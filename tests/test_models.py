@@ -119,6 +119,40 @@ class TestShopcart(TestCase):
         found = Shopcart.find(44)
         self.assertEqual(len(found.all()), 1)
 
+    def test_validation(self):
+        """It should raise a DataValidationError if required fields in JSONB item_list are missing"""
+        item_list = [{"product_id": 21}]
+        shopcart = Shopcart()
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = [{"product_id": 21, "description": "Item 21"}]
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = [{"product_id": 21, "description": "Item 21", "price": 214}]
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = [
+            {"product_id": 21, "description": "Item 21", "price": 214, "quantity": "24"}
+        ]
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = 123
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = [{}]
+        self.assertRaises(
+            DataValidationError, shopcart.validate_item_list, None, item_list
+        )
+        item_list = [
+            {"product_id": 21, "description": "Item 21", "price": 214, "quantity": 24}
+        ]
+        self.assertEqual(shopcart.validate_item_list(None, item_list), item_list)
+
     # ----------------------------------------------------------
     # Sad Data Validation test.
     # ----------------------------------------------------------
