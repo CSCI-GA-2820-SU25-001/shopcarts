@@ -30,7 +30,7 @@ class Shopcart(db.Model):
     # Table Schema
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer)
+    customer_id = db.Column(db.Integer, unique=True)
     item_list = db.Column(MutableList.as_mutable(JSONB), default=list)
 
     @validates("item_list")
@@ -93,8 +93,16 @@ class Shopcart(db.Model):
                 data["product_id"],
                 customer_id,
             )
+            create_existing = False
             cart = self.find(customer_id)
-            cart.item_list.append(data)
+            for item in cart.item_list:
+                if item["product_id"] == data["product_id"]:
+                    item["quantity"] += data["quantity"]
+                    data["quantity"] = item["quantity"]
+                    create_existing = True
+                    flag_modified(cart, "item_list")
+            if not create_existing:
+                cart.item_list.append(data)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
@@ -211,6 +219,19 @@ class Shopcart(db.Model):
         """Finds a Shopcart by customer ID"""
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.filter_by(customer_id=by_id).first()
+
+    @classmethod
+    def find_filtered(cls, by_id, by_price):
+        """Returns all of the items in shopcart item_list filtered by max_price"""
+        logger.info("Processing all Shopcarts")
+        cart = cls.query.filter_by(customer_id=by_id).first()
+        out = []
+        if cart is None:
+            return None
+        for item in cart.item_list:
+            if int(item["price"]) <= int(by_price):
+                out.append(item)
+        return out
 
     @classmethod
     def save(cls):

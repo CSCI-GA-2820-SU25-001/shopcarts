@@ -63,11 +63,16 @@ def create_shopcarts():
     shopcart.deserialize(data)
 
     # Save the new Shopcart to the database
-    shopcart.create()
-    app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
+    if Shopcart.find(data["customer_id"]):
+        abort(
+            status.HTTP_409_CONFLICT,
+            "User already has a shopcart",
+        )
+    else:
+        shopcart.create()
+        app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
 
     # Return the location of the new Shopcart
-
     location_url = url_for("create_shopcarts", _external=True)
     return (
         jsonify(shopcart.serialize()),
@@ -124,10 +129,7 @@ def get_all_shopcarts():
     # Attempt to find the Shopcart and abort if not found
     shopcart = Shopcart.all()
     if not shopcart:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            "No user has any active shopcarts",
-        )
+        return jsonify([]), status.HTTP_200_OK
 
     app.logger.info("Returning shopcarts: %s", shopcart)
     return jsonify([x.serialize() for x in shopcart]), status.HTTP_200_OK
@@ -144,17 +146,19 @@ def get_all_shopcarts_items(customer_id):
     This endpoint will return all entries in the database
     """
     app.logger.info("Request to Retrieve all shopcart items for customer")
+    max_price = request.args.get("max-price")
 
     # Attempt to find the Shopcart and abort if not found
-    shopcart = Shopcart.find(customer_id)
-    if not shopcart or len(shopcart.item_list) == 0:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            "User has no shop cart available",
-        )
+    if max_price:
+        shopcart = Shopcart.find_filtered(customer_id, max_price)
+    else:
+        shopcart = Shopcart.find(customer_id).item_list
+
+    if not shopcart:
+        return jsonify([]), status.HTTP_200_OK
 
     app.logger.info("Returning shopcart items: %s", shopcart)
-    return jsonify(shopcart.item_list), status.HTTP_200_OK
+    return jsonify(shopcart), status.HTTP_200_OK
 
 
 ######################################################################
@@ -318,6 +322,33 @@ def update_shopcarts(customer_id):
     shopcart.update(customer_id, data)
 
     app.logger.info("Shopcart for customer %d updated.", customer_id)
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# CLEAR AN EXISTING SHOPCART
+######################################################################
+@app.route("/shopcarts/<int:customer_id>/clear", methods=["PUT"])
+def clear_shopcarts(customer_id):
+    """
+    Update a Shopcart
+
+    This endpoint will clear a Shopcart of items
+    """
+    app.logger.info("Request to clear a shopcart for customer [%d]", customer_id)
+
+    # Attempt to find the Shopcart and abort if not found
+    shopcart = Shopcart.find(customer_id)
+    if not shopcart:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Shopcart for customer '{customer_id}' was not found.",
+        )
+
+    # Save the updates to the database
+    shopcart.update(customer_id, [])
+
+    app.logger.info("Shopcart for customer %d cleared.", customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
 
 
