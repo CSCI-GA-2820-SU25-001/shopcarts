@@ -162,6 +162,35 @@ class TestShopcartService(TestCase):
             new_shopcart["item_list"][0]["product_id"], new_item["product_id"]
         )
 
+    def test_create_duplicate_shopcart_subordinate(self):
+        """It should update the quantity of existing shopcart item on create duplicate attempt"""
+        test_shopcart = ShopcartFactory()
+        logging.debug("Test Shopcart: %s", test_shopcart.serialize())
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        customer_id = test_shopcart.customer_id
+        new_item = {
+            "product_id": 1,
+            "description": "Banana",
+            "price": 100,
+            "quantity": 2,
+        }
+        response = self.client.post(
+            f"{BASE_URL}/{customer_id}/items",
+            json=new_item,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(
+            f"{BASE_URL}/{customer_id}/items",
+            json=new_item,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_shopcart = response.get_json()
+        self.assertEqual(new_shopcart["product_id"], new_item["product_id"])
+        self.assertEqual(new_shopcart["quantity"], new_item["quantity"] * 2)
+
     # ----------------------------------------------------------
     # TEST READ SHOPCART
     # ----------------------------------------------------------
