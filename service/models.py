@@ -8,6 +8,7 @@ import logging
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm.attributes import flag_modified
 
 logger = logging.getLogger("flask.app")
 
@@ -61,8 +62,16 @@ class Shopcart(db.Model):
                 data["product_id"],
                 customer_id,
             )
+            create_existing = False
             cart = self.find(customer_id)
-            cart.item_list.append(data)
+            for item in cart.item_list:
+                if item["product_id"] == data["product_id"]:
+                    item["quantity"] += data["quantity"]
+                    data["quantity"] = item["quantity"]
+                    create_existing = True
+                    flag_modified(cart, "item_list")
+            if not create_existing:
+                cart.item_list.append(data)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
