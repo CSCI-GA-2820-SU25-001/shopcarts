@@ -23,7 +23,7 @@ and Delete Shopcart
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from service.models import Shopcart
+from service.models import Shopcart, DataValidationError
 from service.common import status  # HTTP Status Codes
 
 
@@ -63,11 +63,16 @@ def create_shopcarts():
     shopcart.deserialize(data)
 
     # Save the new Shopcart to the database
-    shopcart.create()
-    app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
+    if Shopcart.find(data["customer_id"]):
+        abort(
+            status.HTTP_409_CONFLICT,
+            "User already has a shopcart",
+        )
+    else:
+        shopcart.create()
+        app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
 
     # Return the location of the new Shopcart
-
     location_url = url_for("create_shopcarts", _external=True)
     return (
         jsonify(shopcart.serialize()),
