@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import validates
+from sqlalchemy.orm.attributes import flag_modified
 
 logger = logging.getLogger("flask.app")
 
