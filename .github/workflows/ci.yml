@@ -50,6 +50,6 @@ jobs:
       run: apt-get update && apt-get install -y git curl gpg
     
     - name: Upload Coverage Reports to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v3.1.4
       with:
-        slug: CSCI-GA-2820-SU25-001/shopcarts
+        token: ${{ secrets.CODECOV_TOKEN }}
