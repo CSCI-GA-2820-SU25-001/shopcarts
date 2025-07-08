@@ -52,5 +52,4 @@ jobs:
     - name: Upload Coverage Reports to Codecov
       uses: codecov/codecov-action@v5
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
         slug: CSCI-GA-2820-SU25-001/shopcarts
