@@ -386,3 +386,12 @@ def update_shopcarts_item(customer_id, product_id):
 
     app.logger.info("Shopcart for customer %d updated.", customer_id)
     return jsonify(shopcart.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
