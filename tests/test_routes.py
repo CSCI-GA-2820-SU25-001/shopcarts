@@ -504,6 +504,7 @@ class TestShopcartService(TestCase):
             f"{BASE_URL}", data="", content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     # ----------------------------------------------------------
     # TEST HEALTH CHECK
     # ----------------------------------------------------------
