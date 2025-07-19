@@ -30,7 +30,7 @@ from .factories import ShopcartFactory
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/shopcarts"
+BASE_URL = "api/shopcarts"
 
 
 ######################################################################
