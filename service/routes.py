@@ -34,11 +34,8 @@ API_BASEURL = "/api"  # Prefix for REST routes
 ######################################################################
 @app.route("/")
 def index():
-    """Root URL response"""
-    return (
-        jsonify({"message": "Shopcart API root url"}),
-        status.HTTP_200_OK,
-    )
+    """HTML frontend page for Adminintration"""
+    return app.send_static_file("index.html")
 
 
 ######################################################################
