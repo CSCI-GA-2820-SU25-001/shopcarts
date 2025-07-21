@@ -16,3 +16,10 @@ Scenario: The server is running
     When I visit the "Home Page"
     Then I should see "Shopcart Administration" in the title
     And I should not see "404 Not Found"
+
+Scenario: Read a shopcart
+    When I visit the "Home Page"
+    Then I set the "ID" to "23"
+    And I press "Retrieve"
+    Then I should see the message "Success"
+    And I should see "23" in the results 
