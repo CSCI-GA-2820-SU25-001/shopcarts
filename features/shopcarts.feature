@@ -16,3 +16,13 @@ Scenario: The server is running
     When I visit the "Home Page"
     Then I should see "Shopcart Administration" in the title
     And I should not see "404 Not Found"
+
+Scenario: List all shopcarts
+    When I visit the "Home Page"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "23" in the results
+    And I should see "54" in the results
+    And I should see "79" in the results
+    And I should see "81" in the results
+    And I should not see "124" in the results
