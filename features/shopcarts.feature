@@ -17,6 +17,7 @@ Scenario: The server is running
     Then I should see "Shopcart Administration" in the title
     And I should not see "404 Not Found"
 
+
 Scenario: List all shopcarts
     When I visit the "Home Page"
     And I press the "List" button
@@ -25,3 +26,13 @@ Scenario: List all shopcarts
     And I should see "Item 2" in the results
     And I should see "200" in the results
     And I should see "240" in the results
+
+Scenario: Delete a shopcart
+    When I visit the "Home Page"
+    And I set the "Customer ID" to "54"
+    And I press the "Delete" button
+    Then I should see the message "Success"
+    When I set the "Customer ID" to "54"
+    And I press the "Retrieve" button
+    Then I should see the message "404 Not Found: Shopcart for customer '22' was not found."
+
