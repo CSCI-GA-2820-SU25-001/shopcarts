@@ -14,6 +14,7 @@ $(function () {
     function clear_form_data() {
         $("#shopcart_customer_id").val("");
         $("#shopcart_item_list").val("");
+        $("#shopcart_max_price").val("");
         let table = '<table class="table table-striped" cellpadding="10">'
             table += '<thead><tr>'
             table += '<th class="col-md-1">Product ID</th>'
@@ -169,9 +170,6 @@ $(function () {
     // ****************************************
 
     $("#clear-btn").click(function () {
-        $("#shopcart_customer_id").val("");
-        $("#shopcart_max_price").val("");
-        $("#shopcart_item_list").val("");
         $("#flash_message").empty();
         clear_form_data()
     });
@@ -220,7 +218,7 @@ $(function () {
   
 
     // ****************************************
-    // Query for a Shopcart
+    // Query a Shopcart by Maximum item price
     // ****************************************
 
     $("#query-btn").click(function () {
