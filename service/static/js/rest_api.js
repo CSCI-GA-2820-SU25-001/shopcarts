@@ -14,6 +14,16 @@ $(function () {
     function clear_form_data() {
         $("#shopcart_customer_id").val("");
         $("#shopcart_item_list").val("");
+        let table = '<table class="table table-striped" cellpadding="10">'
+            table += '<thead><tr>'
+            table += '<th class="col-md-1">Product ID</th>'
+            table += '<th class="col-md-2">Price</th>'
+            table += '<th class="col-md-2">Quantity</th>'
+            table += '<th class="col-md-6">Description</th>'
+            table += '</tr></thead><tbody>'
+            table += '</tbody></table>';
+        $("#search_results").empty();
+        $("#search_results").append(table);
     }
 
     // Updates the flash message area
@@ -210,7 +220,7 @@ $(function () {
     });
 
     // ****************************************
-    // Search for a Shopcart
+    // Query for a Shopcart
     // ****************************************
 
     $("#query-btn").click(function () {
@@ -227,12 +237,12 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/api/shopcarts/${customer_id}?${queryString}`,
+            url: `/api/shopcarts/${customer_id}/items?${queryString}`,
             contentType: "application/json",
             data: ''
         })
 
-        ajax.done(function(res){
+        ajax.done(function(res) {
             //alert(res.toSource())
             $("#search_results").empty();
             let table = '<table class="table table-striped" cellpadding="10">'
@@ -243,23 +253,22 @@ $(function () {
             table += '<th class="col-md-6">Description</th>'
             table += '</tr></thead><tbody>'
             let firstItem = "";
-            results = res.item_list
-            for(let i = 0; i < results.length; i++) {
-                let cart = results[i];
-                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.queryString}</td></tr>`;
+            for(let i = 0; i < res.length; i++) {
+                let cart = res[i];
+                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.description}</td></tr>`;
                 if (i == 0) {
                     firstItem = cart;
                 }
             }
             table += '</tbody></table>';
+            
             $("#search_results").append(table);
-
+            
             // copy the result to the form
             if (firstItem != "") {
-                update_form_data(res)
+                $("shopcart_item_list").val(JSON.stringify(res))
             }
-
-            flash_message("Success")
+            flash_message("Success");
         });
 
         ajax.fail(function(res){
@@ -295,10 +304,9 @@ $(function () {
             table += '<th class="col-md-6">Description</th>'
             table += '</tr></thead><tbody>'
             let firstItem = "";
-            results = res.item_list
-            for(let i = 0; i < results.length; i++) {
-                let cart = results[i];
-                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.queryString}</td></tr>`;
+            for(let i = 0; i < res.length; i++) {
+                let cart = res[i];
+                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.description}</td></tr>`;
                 if (i == 0) {
                     firstItem = cart;
                 }
@@ -308,7 +316,7 @@ $(function () {
 
             // copy the result to the form
             if (firstItem != "") {
-                update_form_data(res)
+                $("shopcart_item_list").val(JSON.stringify(res))
             }
 
             flash_message("Success")
