@@ -185,7 +185,7 @@ $(function () {
     // Action on Shopcart (Clear Cart)
     // ****************************************
 
-    $("clear-btn").click(function () {
+    $("#action-btn").click(function () {
        let customer_id = $("#shopcart_customer_id").val();
 
         $("#flash_message").empty();
