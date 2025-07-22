@@ -510,7 +510,7 @@ class TestShopcartService(TestCase):
     # ----------------------------------------------------------
     def test_health(self):
         """It should be healthy"""
-        response = self.client.get("/health")
+        response = self.client.get("/api/health")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(data["status"], 200)
