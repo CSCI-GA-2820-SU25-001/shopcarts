@@ -47,7 +47,7 @@ service/                    - service python package
 ├    ├── error_handlers.py  - HTTP error handling code
 ├    ├── log_handlers.py    - logging setup code
 ├    └── status.py          - HTTP status constants
-└── static                  - common code package
+└── static                  - UI related files
     ├── index.html          - Admin UI page markup file
     ├── js                  - Contains Javascript code for UI
     ├── css                 - Contains style files for UI
