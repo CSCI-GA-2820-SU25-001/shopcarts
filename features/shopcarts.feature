@@ -18,6 +18,15 @@ Scenario: The server is running
     And I should not see "404 Not Found"
 
 
+Scenario: Create a Shopcart
+    When I visit the "Home Page"
+    And I set the "Customer ID" to "99"
+    And I set the "Item List" to "[]"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    And I should see "99" in the "Customer ID" field
+    And I should see "[]" in the "Item List" field
+
 Scenario: Update a shopcart
     When I visit the "Home Page"
     And I set the "Customer ID" to "23"
