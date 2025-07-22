@@ -23,7 +23,6 @@ spec:
       containers:
       - name: shopcarts
         image: cluster-registry:5000/shopcarts:1.0.0
-        # image: shopcarts
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -40,7 +39,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 30
           httpGet:
-            path: /health
+            path: /api/health
             port: 8080
         resources:
           limits:
