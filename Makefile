@@ -82,9 +82,9 @@ init:	## Creates the buildx instance
 	docker buildx inspect --bootstrap
 
 .PHONY: build
-build:	## Build the project container image for local platform
+build:	## Build the project container image for local platform "--network=host" was a suggestion from ChatGPT
 	$(info Building $(IMAGE)...)
-	docker build --rm --pull --tag $(IMAGE) .
+	docker build --network=host --rm --pull --tag $(IMAGE) . 
 
 .PHONY: push
 push:	## Push the image to the container registry
