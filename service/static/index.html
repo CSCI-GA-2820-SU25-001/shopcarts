@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shopcart RESTful microservice</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="static/images/newapp-icon.png">
+    <link rel="stylesheet" href="static/css/cerulean_bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+          <h1>Shopcart REST API Service</h1>
+      </div>
+
+      <!-- Flash Message -->
+      <div class="table-responsive">
+        <table class="table">
+          <tr><td>Status:</td><td><span id="flash_message"></span></td></tr>
+        </table>
+      </div>
+
+      <!-- FORM -->
+      <div class="col-md-12" id="form_data">
+        <h3>Create, Retrieve, Update, Delete, List, Query and Action on a Shopcart:</h3>
+        <div class="well">
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="shopcart_id">Customer ID:</label>
+              <div class="col-sm-6">
+                <input type="text" class="form-control" id="shopcart_id" placeholder="Enter ID of Shopcart's Customer">
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-success" id="retrieve-btn">Retrieve</button>
+                <button type="submit" class="btn btn-success" id="list-btn">List</button>
+                <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+                <button type="submit" class="btn btn-danger" id="delete-btn">Action</button>
+              </div>
+            </div>
+          </div> <!-- form horizontal -->
+
+          <div class="form-horizontal">
+
+            <!-- MAX PRICE -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="shopcart_id">Max Item Price:</label>
+              <div class="col-sm-6">
+                <input type="number" class="form-control" id="shopcart_max_price" placeholder="Enter max price for query">
+              </div>
+              <div class="col-sm-4">
+                <button onclick="prettyify()" class="btn btn-success" id="retrieve-btn">Query</button>
+              </div>
+            </div>
+
+            <!-- ITEM LIST -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="shopcart_item_list">Item List:</label>
+              <div class="col-sm-6">
+                <textarea type="text" class="form-control" id="shopcart_item_list" placeholder="Enter Array of Products (JSON)" cols="20", rows="10"></textarea>
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+              </div>
+            </div>
+
+            <!-- SUBMIT BUTTONS -->
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary" id="clear-btn">Clear Form</button>
+                <button type="submit" class="btn btn-primary" id="format-btn">Prettify</button>
+                
+              </div>
+            </div>
+          </div> <!-- form horizontal -->
+        </div> <!-- end well -->
+      </div> <!-- end Form -->
+
+      <!-- Search Results -->
+      <div class="table-responsive col-md-12" id="search_results">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th class="col-md-1">Product ID</th>
+            <th class="col-md-2">Price</th>
+            <th class="col-md-2">Quantity</th>
+            <th class="col-md-6">Description</th>
+          </tr>
+          </thead>
+        </table>
+      </div>
+
+      <footer>
+        <br><br>
+        <p>&copy; NYU DevOps Company 2022</p>
+      </footer>
+
+    </div> <!-- container -->
+
+  <script type="text/javascript" src = "static/js/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript" src = "static/js/bootstrap.min.js"></script>
+
+  <!-- YOUR REST API -->
+  <script type="text/javascript" src="static/js/rest_api.js"></script>
+
+  </body>
+</html>

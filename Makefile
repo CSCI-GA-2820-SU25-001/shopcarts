@@ -1,7 +1,7 @@
 # These can be overidden with env vars.
 REGISTRY ?= cluster-registry:5000
 IMAGE_NAME ?= shopcarts
-IMAGE_TAG ?= 1.0
+IMAGE_TAG ?= 1.0.0
 IMAGE ?= $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 PLATFORM ?= "linux/amd64,linux/arm64"
 CLUSTER ?= nyu-devops
@@ -82,9 +82,9 @@ init:	## Creates the buildx instance
 	docker buildx inspect --bootstrap
 
 .PHONY: build
-build:	## Build the project container image for local platform
+build:	## Build the project container image for local platform "--network=host" was a suggestion from ChatGPT
 	$(info Building $(IMAGE)...)
-	docker build --rm --pull --tag $(IMAGE) .
+	docker build --network=host --rm --pull --tag $(IMAGE) . 
 
 .PHONY: push
 push:	## Push the image to the container registry
