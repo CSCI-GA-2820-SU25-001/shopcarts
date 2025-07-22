@@ -17,6 +17,16 @@ Scenario: The server is running
     Then I should see "Shopcart Administration" in the title
     And I should not see "404 Not Found"
 
+Scenario: Query items within a shopcart
+    When I visit the "Home Page"
+    And I set the "Customer ID" to "81"
+    And I set the "Max Price" to "220"
+    And I press the "Query" button
+    Then I should see the message "Success"
+    And I should see "81" in the "ID" field
+    And I should see "Item 1" in the results
+    And I should not see "Item 2" in the results
+
 Scenario: Read a shopcart
     When I visit the "Home Page"
     Then I set the "Customer ID" to "23"
