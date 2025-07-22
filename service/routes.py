@@ -26,17 +26,16 @@ from flask import current_app as app  # Import Flask application
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
 
+API_BASEURL = "/api"  # Prefix for REST routes
+
 
 ######################################################################
-# HEALTH CHECK
+# ADMIN UI PAGE
 ######################################################################
 @app.route("/")
 def index():
-    """Root URL response"""
-    return (
-        jsonify({"message": "Shopcart API root url"}),
-        status.HTTP_200_OK,
-    )
+    """HTML frontend page for Adminintration"""
+    return app.send_static_file("index.html")
 
 
 ######################################################################
@@ -47,7 +46,7 @@ def index():
 ######################################################################
 # CREATE A NEW SHOPCART
 ######################################################################
-@app.route("/shopcarts", methods=["POST"])
+@app.route(API_BASEURL + "/shopcarts", methods=["POST"])
 def create_shopcarts():
     """
     Create a Shopcart
@@ -84,7 +83,7 @@ def create_shopcarts():
 ######################################################################
 # CREATE A NEW ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items", methods=["POST"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>/items", methods=["POST"])
 def create_shopcarts_item(customer_id):
     """
     Create a Shopcart item
@@ -117,7 +116,7 @@ def create_shopcarts_item(customer_id):
 ######################################################################
 # LIST ALL SHOPCARTS
 ######################################################################
-@app.route("/shopcarts", methods=["GET"])
+@app.route(API_BASEURL + "/shopcarts", methods=["GET"])
 def get_all_shopcarts():
     """
     Retrieve all Shopcart
@@ -138,7 +137,7 @@ def get_all_shopcarts():
 ######################################################################
 # LIST ALL SHOPCART ITEMS
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items", methods=["GET"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>/items", methods=["GET"])
 def get_all_shopcarts_items(customer_id):
     """
     Retrieve all Shopcart items
@@ -164,7 +163,7 @@ def get_all_shopcarts_items(customer_id):
 ######################################################################
 # READ A SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>", methods=["GET"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>", methods=["GET"])
 def get_shopcarts(customer_id):
     """
     Retrieve a single Shopcart
@@ -187,7 +186,9 @@ def get_shopcarts(customer_id):
 ######################################################################
 # READ AN INDIVIDUAL ITEM FROM SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["GET"])
+@app.route(
+    API_BASEURL + "/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["GET"]
+)
 def get_shopcarts_item(customer_id, product_id):
     """
     Retrieve a single Shopcart
@@ -218,7 +219,10 @@ def get_shopcarts_item(customer_id, product_id):
 ######################################################################
 # DELETE AN ITEM FROM SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["DELETE"])
+@app.route(
+    API_BASEURL + "/shopcarts/<int:customer_id>/items/<int:product_id>",
+    methods=["DELETE"],
+)
 def delete_shopcarts_item(customer_id, product_id):
     """
     Delete a Shopcart
@@ -245,7 +249,7 @@ def delete_shopcarts_item(customer_id, product_id):
 ######################################################################
 # DELETE A SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>", methods=["DELETE"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>", methods=["DELETE"])
 def delete_shopcarts(customer_id):
     """
     Delete a Shopcart
@@ -267,36 +271,9 @@ def delete_shopcarts(customer_id):
 
 
 ######################################################################
-#  U T I L I T Y   F U N C T I O N S
-######################################################################
-
-
-######################################################################
-# Checks the ContentType of a request
-######################################################################
-def check_content_type(content_type) -> None:
-    """Checks that the media type is correct"""
-    if "Content-Type" not in request.headers:
-        app.logger.error("No Content-Type specified.")
-        abort(
-            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            f"Content-Type must be {content_type}",
-        )
-
-    if request.headers["Content-Type"] == content_type:
-        return
-
-    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-    abort(
-        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        f"Content-Type must be {content_type}",
-    )
-
-
-######################################################################
 # UPDATE AN EXISTING SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>", methods=["PUT"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>", methods=["PUT"])
 def update_shopcarts(customer_id):
     """
     Update a Shopcart
@@ -328,7 +305,7 @@ def update_shopcarts(customer_id):
 ######################################################################
 # CLEAR AN EXISTING SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/clear", methods=["PUT"])
+@app.route(API_BASEURL + "/shopcarts/<int:customer_id>/clear", methods=["PUT"])
 def clear_shopcarts(customer_id):
     """
     Update a Shopcart
@@ -355,7 +332,9 @@ def clear_shopcarts(customer_id):
 ######################################################################
 # UPDATE INDIVIDUAL ITEM IN SHOPCART
 ######################################################################
-@app.route("/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["PUT"])
+@app.route(
+    API_BASEURL + "/shopcarts/<int:customer_id>/items/<int:product_id>", methods=["PUT"]
+)
 def update_shopcarts_item(customer_id, product_id):
     """
     Update a Shopcart
@@ -389,9 +368,36 @@ def update_shopcarts_item(customer_id, product_id):
 
 
 ######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+
+
+######################################################################
+# Checks the ContentType of a request
+######################################################################
+def check_content_type(content_type) -> None:
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )
+
+
+######################################################################
 # GET HEALTH CHECK
 ######################################################################
-@app.route("/health")
+@app.route(API_BASEURL + "/health")
 def health_check():
     """Let them know our heart is still beating"""
     return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
