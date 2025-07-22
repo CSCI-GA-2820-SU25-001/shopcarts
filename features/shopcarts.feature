@@ -19,7 +19,8 @@ Scenario: The server is running
 
 Scenario: Read a shopcart
     When I visit the "Home Page"
-    Then I set the "ID" to "23"
+    Then I set the "Customer ID" to "23"
     And I press "Retrieve"
     Then I should see the message "Success"
-    And I should see "23" in the results 
+    And I should see "23" in the "Customer ID" field
+    And I should see "[]" in the "Item List" field
