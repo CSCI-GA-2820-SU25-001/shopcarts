@@ -31,28 +31,35 @@ $(function () {
         let customer_id = $("#shopcart_customer_id").val();
         let item_list = $("#shopcart_item_list").val();
 
-        let data = {
+        try {
+            JSON.parse(item_list);
+            let data = {
             "customer_id": customer_id,
             "item_list": item_list
-        };
+            };
 
-        $("#flash_message").empty();
+            $("#flash_message").empty();
+            
+            let ajax = $.ajax({
+                type: "POST",
+                url: "/api/shopcarts",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+            });
+
+            ajax.done(function(res){
+                update_form_data(res)
+                flash_message("Success")
+            });
+
+            ajax.fail(function(res){
+                flash_message(res.responseJSON.message)
+            });
+
+        } catch (e) {
+            alert('Invalid JSON: ' + e.message);
+        }
         
-        let ajax = $.ajax({
-            type: "POST",
-            url: "/api/shopcarts",
-            contentType: "application/json",
-            data: JSON.stringify(data),
-        });
-
-        ajax.done(function(res){
-            update_form_data(res)
-            flash_message("Success")
-        });
-
-        ajax.fail(function(res){
-            flash_message(res.responseJSON.message)
-        });
     });
 
 
@@ -66,31 +73,28 @@ $(function () {
         let item_list = $("#shopcart_item_list").val();
 
         try {
-            let obj = JSON.parse(item_list);
-            let pretty = JSON.stringify(obj, null, 4);
-            $("#shopcart_item_list").val(pretty);
+            JSON.parse(item_list);
+            $("#flash_message").empty();
+
+            let ajax = $.ajax({
+                    type: "PUT",
+                    url: `/api/shopcarts/${customer_id}`,
+                    contentType: "application/json",
+                    data: JSON.stringify(item_list)
+                })
+
+            ajax.done(function(res){
+                update_form_data(res)
+                flash_message("Success")
+            });
+
+            ajax.fail(function(res){
+                flash_message(res.responseJSON.message)
+            });
+
         } catch (e) {
             alert('Invalid JSON: ' + e.message);
         }
-
-        $("#flash_message").empty();
-
-        let ajax = $.ajax({
-                type: "PUT",
-                url: `/api/shopcarts/${customer_id}`,
-                contentType: "application/json",
-                data: JSON.stringify(item_list)
-            })
-
-        ajax.done(function(res){
-            update_form_data(res)
-            flash_message("Success")
-        });
-
-        ajax.fail(function(res){
-            flash_message(res.responseJSON.message)
-        });
-
     });
 
     // ****************************************
