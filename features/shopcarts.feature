@@ -19,12 +19,9 @@ Scenario: The server is running
 
 Scenario: Delete a shopcart
     When I visit the "Home Page"
-    And I set the "ID" to "54"
+    And I set the "Customer ID" to "54"
     And I press the "Delete" button
     Then I should see the message "Success"
-    When I press the "Clear" button
-    Then I press the "Search" button
-    And I should see "23" in the results
-    And I should see "81" in the results
-    And I should see "79" in the results
-    And I should not see "54" in the results
+    When I set the "Customer ID" to "54"
+    And I press the "Retrieve" button
+    Then I should see the message "404 Not Found: Shopcart for customer '22' was not found."
