@@ -7,7 +7,7 @@ $(function () {
     // Updates the form with data from the response
     function update_form_data(res) {
         $("#shopcart_customer_id").val(res.customer_id);
-        $("#shopcart_item_list").val(res.item_list);
+        $("#shopcart_item_list").val(JSON.stringify(res.item_list));
     }
 
     /// Clears all form fields
@@ -80,7 +80,7 @@ $(function () {
                     type: "PUT",
                     url: `/api/shopcarts/${customer_id}`,
                     contentType: "application/json",
-                    data: JSON.stringify(item_list)
+                    data: item_list
                 })
 
             ajax.done(function(res){
