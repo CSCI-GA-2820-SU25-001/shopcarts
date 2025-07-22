@@ -34,8 +34,8 @@ $(function () {
         try {
             JSON.parse(item_list);
             let data = {
-            "customer_id": customer_id,
-            "item_list": item_list
+            "customer_id": parseInt(customer_id),
+            "item_list": JSON.parse(item_list)
             };
 
             $("#flash_message").empty();
