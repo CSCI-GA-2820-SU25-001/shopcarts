@@ -217,7 +217,7 @@ $(function () {
             flash_message("Server error!")
         });
     });
-    });
+  
 
     // ****************************************
     // Query for a Shopcart
@@ -260,13 +260,13 @@ $(function () {
                     firstItem = cart;
                 }
             }
-            table += '</tbody></table>';
+            table += '</tbody></table>'
             
             $("#search_results").append(table);
             
             // copy the result to the form
             if (firstItem != "") {
-                $("shopcart_item_list").val(JSON.stringify(res))
+                $("#shopcart_item_list").val(JSON.stringify(res))
             }
             flash_message("Success");
         });
@@ -311,12 +311,12 @@ $(function () {
                     firstItem = cart;
                 }
             }
-            table += '</tbody></table>';
+            table += '</tbody></table>'
             $("#search_results").append(table);
 
             // copy the result to the form
             if (firstItem != "") {
-                $("shopcart_item_list").val(JSON.stringify(res))
+                $("#shopcart_item_list").val(JSON.stringify(res))
             }
 
             flash_message("Success")
@@ -327,3 +327,4 @@ $(function () {
         });
 
     });
+});
