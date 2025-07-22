@@ -20,8 +20,9 @@ Scenario: The server is running
 
 Scenario: Create a Shopcart
     When I visit the "Home Page"
-    And I set the "ID" to "99"
-    And I press the "Create Shopcart" button
-    Then I should see the message "Shopcart has been Created!"
-    And I should see "99" in the "ID" field
-    And I should see "[]" in the "Item_List" field
+    And I set the "Customer ID" to "99"
+    And I set the "Item List" to "[]"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    And I should see "99" in the "Customer ID" field
+    And I should see "[]" in the "Item List" field
