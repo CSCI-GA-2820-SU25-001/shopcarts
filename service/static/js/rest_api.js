@@ -181,12 +181,13 @@ $(function () {
     // Action on Shopcart (Clear Cart)
     // ****************************************
 
-    let customer_id = $("#shopcart_customer_id").val();
+    $("clear-btn").click(function () {
+       let customer_id = $("#shopcart_customer_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
-            type: "DELETE",
+            type: "PUT",
             url: `/api/shopcarts/${customer_id}/clear`,
             contentType: "application/json",
             data: '',
@@ -201,6 +202,7 @@ $(function () {
         ajax.fail(function(res){
             flash_message("Server error!")
         });
+    });
     });
 
     // ****************************************
