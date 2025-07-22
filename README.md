@@ -18,59 +18,111 @@ The project contains the following:
 ```text
 .gitignore          - this will ignore vagrant and other metadata files
 .flaskenv           - Environment variables to configure Flask
-.gitattributes      - File to gix Windows CRLF issues
+.gitattributes      - File to fix Windows CRLF issues
 .devcontainers/     - Folder with support for VSCode Remote Containers
 dot-env-example     - copy to .env to use environment variables
 pyproject.toml      - Poetry list of Python libraries required by your code
+Pipfile             - Contains list of python runtime and development dependencies
+k3d-config.yaml     - Configuration for K3D
 
-service/                   - service python package
-├── __init__.py            - package initializer
-├── config.py              - configuration parameters
-├── models.py              - module with business models
-├── routes.py              - module with service routes
-└── common                 - common code package
-    ├── cli_commands.py    - Flask command to recreate all tables
-    ├── error_handlers.py  - HTTP error handling code
-    ├── log_handlers.py    - logging setup code
-    └── status.py          - HTTP status constants
+k8s/                        - Kubernetes configuration files
+├── deployment.yaml         - Defines the state for deploying pods
+├── ingress.yaml            - Defines the routing paths for all hosts
+└── service.yaml            - Define kubernetes services as needed
 
-tests/                     - test cases package
-├── __init__.py            - package initializer
-├── factories.py           - Factory for testing with fake objects
-├── test_cli_commands.py   - test suite for the CLI
-├── test_models.py         - test suite for business models
-└── test_routes.py         - test suite for service routes
+features/                   - Selenium UI based BDD testing files
+├── environment.py          - Web browser environment config
+├── shopcarts.feature       - Scenarios for BDD
+└── steps
+    ├── shopcarts_steps.py  - Steps file for shopcart.feature
+    └── web_steps.py        - Gherkin langugage to web action translation
+
+service/                    - service python package
+├── __init__.py             - package initializer
+├── config.py               - configuration parameters
+├── models.py               - module with business models
+├── routes.py               - module with service routes
+├── common                  - common code package
+├    ├── cli_commands.py    - Flask command to recreate all tables
+├    ├── error_handlers.py  - HTTP error handling code
+├    ├── log_handlers.py    - logging setup code
+├    └── status.py          - HTTP status constants
+└── static                  - common code package
+    ├── index.html          - Admin UI page markup file
+    ├── js                  - Contains Javascript code for UI
+    ├── css                 - Contains style files for UI
+    └── images              - Contains image assets used in UI
+
+tests/                      - test cases package
+├── __init__.py             - package initializer
+├── factories.py            - Factory for testing with fake objects
+├── test_cli_commands.py    - test suite for the CLI
+├── test_models.py          - test suite for business models
+└── test_routes.py          - test suite for service routes
 ```
 
 ## API Description:
 
 The Shopcarts service has these API endpoints:
 
-| Operation                         | Method | URL                                           |
-|-----------------------------------|--------|-----------------------------------------------|
-| **Create a new shopcart**         | POST   | `/shopcarts`                                  |
-| **Get a shopcart**                | GET    | `/shopcarts/{customer_id}`                    |
-| **List all shopcarts**            | GET    | `/shopcarts`                                  |
-| **Update a shopcart**             | PUT    | `/shopcarts/{customer_id}`                    |
-| **Delete a shopcart**             | DELETE | `/shopcarts/{customer_id}`                    |
-| **Add an item to a shopcart**     | POST   | `/shopcarts/{customer_id}/items`              |
-| **Get an item from a shopcart**   | GET    | `/shopcarts/{customer_id}/items/{product_id}` |
-| **List all items in a shopcart**  | GET    | `/shopcarts/{customer_id}/items`              |
-| **Update a shopcart item**        | PUT    | `/shopcarts/{customer_id}/items/{product_id}` |
-| **Delete a shopcart item**        | DELETE | `/shopcarts/{customer_id}/items/{product_id}` |
+| Operation                         | Method | URL                                               |
+|-----------------------------------|--------|---------------------------------------------------|
+| **Health check endpoint**         | GET    | `/api/health`                                     |
+| **Create a new shopcart**         | POST   | `/api/shopcarts`                                  |
+| **Get a shopcart**                | GET    | `/api/shopcarts/{customer_id}`                    |
+| **Query a shopcart**              | GET    | `/api/shopcarts/{customer_id}?max-price=`         |
+| **List all shopcarts**            | GET    | `/api/shopcarts`                                  |
+| **Update a shopcart**             | PUT    | `/api/shopcarts/{customer_id}`                    |
+| **Delete a shopcart**             | DELETE | `/api/shopcarts/{customer_id}`                    |
+| **Add an item to a shopcart**     | POST   | `/api/shopcarts/{customer_id}/items`              |
+| **Get an item from a shopcart**   | GET    | `/api/shopcarts/{customer_id}/items/{product_id}` |
+| **List all items in a shopcart**  | GET    | `/api/shopcarts/{customer_id}/items`              |
+| **Update a shopcart item**        | PUT    | `/api/shopcarts/{customer_id}/items/{product_id}` |
+| **Delete a shopcart item**        | DELETE | `/api/shopcarts/{customer_id}/items/{product_id}` |
+| **Perform Action on shopcart**    | PUT    | `/api/shopcarts/{customer_id}/clear`              |
+
+The UI for Admin is located at the `/` root URL.
 
 
 ## Commands for running tests and services.
-Running the tests:
 
-```bash
-make test
-```
-
-Running the Shopcart Service locally (`http://localhost:8080`):
+### Running the Shopcart Service locally (`http://localhost:8080`):
 
 ```bash
 honcho start
+```
+### Running the tests:
+#### Run all unit tests locally
+```bash
+make test
+```
+#### BDD using Selenium
+```bash
+behave
+```
+
+### Docker and Kubernetes Deployment:
+
+#### Build Docker Image
+```bash
+make build
+```
+
+#### Push to Registry
+```bash
+make push
+```
+
+#### Deploy to Kubernetes (local development)
+```bash
+make cluster      # Create a local K3D Kubernetes cluster
+make deploy       # Deploy the service to Kubernetes
+```
+
+#### Clean Up
+```bash
+make clean        # Remove Docker build cache
+make cluster-rm   # Delete the Kubernetes cluster
 ```
 
 ## License
