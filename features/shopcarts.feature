@@ -16,3 +16,12 @@ Scenario: The server is running
     When I visit the "Home Page"
     Then I should see "Shopcart Administration" in the title
     And I should not see "404 Not Found"
+
+
+Scenario: Create a Shopcart
+    When I visit the "Home Page"
+    And I set the "ID" to "99"
+    And I press the "Create Shopcart" button
+    Then I should see the message "Shopcart has been Created!"
+    And I should see "99" in the "ID" field
+    And I should see "[]" in the "Item_List" field
