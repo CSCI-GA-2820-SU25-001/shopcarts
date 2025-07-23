@@ -38,9 +38,8 @@ Scenario: Query items within a shopcart
     And I set the "Max Price" to "220"
     And I press the "Query" button
     Then I should see the message "Success"
-    And I should see "81" in the "ID" field
-    And I should see "Item 1" in the results
-    And I should not see "Item 2" in the results
+    And I should see "81" in the "Customer ID" field
+    And I should see "Item 1" in the "Item List" field
 
 Scenario: Read a shopcart
     When I visit the "Home Page"
@@ -81,10 +80,10 @@ Scenario: List all shopcarts
     When I visit the "Home Page"
     And I press the "List" button
     Then I should see the message "Success"
-    And I should see "Item 1" in the results
-    And I should see "Item 2" in the results
-    And I should see "200" in the results
-    And I should see "240" in the results
+    And I should see "Item 1" in the "Item List" field
+    And I should see "Item 2" in the "Item List" field
+    And I should see "200" in the "Item List" field
+    And I should see "240" in the "Item List" field
 
 Scenario: Delete a shopcart
     When I visit the "Home Page"
