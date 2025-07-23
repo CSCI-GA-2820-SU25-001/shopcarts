@@ -76,8 +76,9 @@ Scenario: Update a shopcart
     And I should see "23" in the "Customer ID" field
     And I should see "[{^description^:^Item^,^price^:20,^product_id^:1,^quantity^:5}]" in the "Item List" field
 
-Scenario: List all shopcarts
+Scenario: List all items
     When I visit the "Home Page"
+    And I set the "Customer ID" to "81"
     And I press the "List" button
     Then I should see the message "Success"
     And I should see "Item 1" in the "Item List" field

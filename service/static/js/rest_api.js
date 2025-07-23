@@ -280,11 +280,13 @@ $(function () {
     // ****************************************
 
     $("#list-btn").click(function () {
+        let customer_id = $("#customer_id").val();
+        
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/api/shopcarts`,
+            url: `/api/shopcarts/${customer_id}/items`,
             contentType: "application/json",
             data: ''
         })
