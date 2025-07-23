@@ -32,7 +32,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-ID_PREFIX = "shopcart_"
+ID_PREFIX = ""
 
 
 def save_screenshot(context: Any, filename: str) -> None:
@@ -178,6 +178,8 @@ def step_impl(context: Any, message: str) -> None:
 @then('I should see "{text_string}" in the "{element_name}" field')
 def step_impl(context: Any, text_string: str, element_name: str) -> None:
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
+    element = context.driver.find_element(By.ID, element_id)
+    print(element.text)
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element_value(
             (By.ID, element_id), text_string
