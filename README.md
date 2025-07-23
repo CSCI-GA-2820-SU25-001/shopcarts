@@ -47,7 +47,7 @@ service/                    - service python package
 ├    ├── error_handlers.py  - HTTP error handling code
 ├    ├── log_handlers.py    - logging setup code
 ├    └── status.py          - HTTP status constants
-└── static                  - common code package
+└── static                  - UI related files
     ├── index.html          - Admin UI page markup file
     ├── js                  - Contains Javascript code for UI
     ├── css                 - Contains style files for UI
@@ -61,7 +61,7 @@ tests/                      - test cases package
 └── test_routes.py          - test suite for service routes
 ```
 
-## API Description:
+## API Description
 
 The Shopcarts service has these API endpoints:
 
@@ -70,7 +70,7 @@ The Shopcarts service has these API endpoints:
 | **Health check endpoint**         | GET    | `/api/health`                                     |
 | **Create a new shopcart**         | POST   | `/api/shopcarts`                                  |
 | **Get a shopcart**                | GET    | `/api/shopcarts/{customer_id}`                    |
-| **Query a shopcart**              | GET    | `/api/shopcarts/{customer_id}?max-price=`         |
+| **Query a shopcart**              | GET    | `/api/shopcarts/{customer_id}/items?max-price=`         |
 | **List all shopcarts**            | GET    | `/api/shopcarts`                                  |
 | **Update a shopcart**             | PUT    | `/api/shopcarts/{customer_id}`                    |
 | **Delete a shopcart**             | DELETE | `/api/shopcarts/{customer_id}`                    |
@@ -81,7 +81,7 @@ The Shopcarts service has these API endpoints:
 | **Delete a shopcart item**        | DELETE | `/api/shopcarts/{customer_id}/items/{product_id}` |
 | **Perform Action on shopcart**    | PUT    | `/api/shopcarts/{customer_id}/clear`              |
 
-The UI for Admin is located at the `/` root URL.
+The UI for API Service Management is located at the `/` root URL.
 
 
 ## Commands for running tests and services.

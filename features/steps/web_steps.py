@@ -167,8 +167,8 @@ def step_impl(context: Any, message: str) -> None:
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
-# prefixed by ID_PREFIX so the Name field has an id='customer_name'
-# We can then lowercase the name and prefix with customer_ to get the id
+# prefixed by ID_PREFIX so the Customer ID field has an id='shopcart_customer_id'
+# We can then lowercase the name and prefix with shopcart_ to get the id
 ##################################################################
 
 
