@@ -4,11 +4,10 @@ Feature: Shopcart Management UI
     So that I can keep track of the shopcart entries in the database
 
   Background:
-    Given the following customers
+    Given the following shopcarts
       | Customer ID | Item List |
       | 23          | []        |
-      | 79          | [{"product_id": 12, "price": 220, "quantity": 2, "description": Item 12}] |
-      | 81          | []        |
+      | 79          | [{"product_id": 12, "price": 220, "quantity": 2, "description": "Item 12"}] |
       | 54          | []        |
       | 81          | [{"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2}, {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5}] |
 

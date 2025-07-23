@@ -49,7 +49,6 @@ def step_impl(context):
             f"{rest_endpoint}/{cart['customer_id']}", timeout=WAIT_TIMEOUT
         )
         expect(context.resp.status_code).equal_to(HTTP_204_NO_CONTENT)
-
     # load the database with new shopcarts
     for row in context.table:
         payload = {
