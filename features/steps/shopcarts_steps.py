@@ -23,6 +23,7 @@ For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
 import requests
+import json
 from compare3 import expect
 from behave import given  # pylint: disable=no-name-in-module
 
@@ -52,8 +53,8 @@ def step_impl(context):
     # load the database with new shopcarts
     for row in context.table:
         payload = {
-            "customer_id": row["customer_id"],
-            "item_list": row["item_list"],
+            "customer_id": int(row[0]),
+            "item_list": json.loads(row[1]),
         }
         context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)

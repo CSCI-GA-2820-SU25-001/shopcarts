@@ -4,12 +4,12 @@ Feature: Shopcart Management UI
     So that I can keep track of the shopcart entries in the database
 
   Background:
-    Given the following customers
-      | Customer ID | Item List |
-      | 23          | []        |
-      | 54          | []        |
+    Given the following shopcarts
+      | Customer ID | Item List                                                                                                                                          |
+      | 23          | []                                                                                                                                                 |
+      | 79          | [{"product_id": 12, "price": 220, "quantity": 2, "description": "Item 12"}]                                                                          |
+      | 54          | []                                                                                                                                                 |
       | 81          | [{"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2}, {"product_id": 2, "description": "Item 2", "price": 240, "quantity": 5}] |
-      | 79          | []        |
 
 
 Scenario: The server is running
@@ -29,8 +29,8 @@ Scenario: Query items within a shopcart
 
 Scenario: Read a shopcart
     When I visit the "Home Page"
-    Then I set the "Customer ID" to "23"
-    And I press "Retrieve"
+    And I set the "Customer ID" to "23"
+    And I press the "Retrieve" button
     Then I should see the message "Success"
     And I should see "23" in the "Customer ID" field
     And I should see "[]" in the "Item List" field
