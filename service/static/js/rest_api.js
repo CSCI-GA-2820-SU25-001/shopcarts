@@ -157,7 +157,7 @@ $(function () {
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Shopcart has been Deleted!")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
@@ -208,11 +208,11 @@ $(function () {
         ajax.done(function(res){
             clear_form_data()
             $("#shopcart_customer_id").val(customer_id);
-            flash_message("Shopcart has been Cleared!")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
-            flash_message("Server error!")
+            flash_message("res.responseJSON.message")
         });
     });
   
