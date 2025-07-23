@@ -6,15 +6,15 @@ $(function () {
 
     // Updates the form with data from the response
     function update_form_data(res) {
-        $("#shopcart_customer_id").val(res.customer_id);
-        $("#shopcart_item_list").val(JSON.stringify(res.item_list));
+        $("#customer_id").val(res.customer_id);
+        $("#item_list").val(JSON.stringify(res.item_list));
     }
 
     /// Clears all form fields
     function clear_form_data() {
-        $("#shopcart_customer_id").val("");
-        $("#shopcart_item_list").val("");
-        $("#shopcart_max_price").val("");
+        $("#customer_id").val("");
+        $("#item_list").val("");
+        $("#max_price").val("");
         let table = '<table class="table table-striped" cellpadding="10">'
             table += '<thead><tr>'
             table += '<th class="col-md-1">Product ID</th>'
@@ -39,8 +39,8 @@ $(function () {
 
     $("#create-btn").click(function () {
 
-        let customer_id = $("#shopcart_customer_id").val();
-        let item_list = $("#shopcart_item_list").val();
+        let customer_id = $("#customer_id").val();
+        let item_list = $("#item_list").val();
 
         try {
             JSON.parse(item_list);
@@ -80,8 +80,8 @@ $(function () {
 
     $("#update-btn").click(function () {
 
-        let customer_id = $("#shopcart_customer_id").val();
-        let item_list = $("#shopcart_item_list").val();
+        let customer_id = $("#customer_id").val();
+        let item_list = $("#item_list").val();
 
         try {
             JSON.parse(item_list);
@@ -114,7 +114,7 @@ $(function () {
 
     $("#retrieve-btn").click(function () {
 
-        let customer_id = $("#shopcart_customer_id").val();
+        let customer_id = $("#customer_id").val();
 
         $("#flash_message").empty();
 
@@ -144,7 +144,7 @@ $(function () {
 
     $("#delete-btn").click(function () {
 
-        let customer_id = $("#shopcart_customer_id").val();
+        let customer_id = $("#customer_id").val();
 
         $("#flash_message").empty();
 
@@ -179,11 +179,11 @@ $(function () {
     // ****************************************
 
     $("#format-btn").click(function () {
-        let ugly = $("#shopcart_item_list").val();
+        let ugly = $("#item_list").val();
         try {
             let obj = JSON.parse(ugly);
             let pretty = JSON.stringify(obj, null, 4);
-            $("#shopcart_item_list").val(pretty);
+            $("#item_list").val(pretty);
         } catch (e) {
             alert('Invalid JSON: ' + e.message);
         }
@@ -194,7 +194,7 @@ $(function () {
     // ****************************************
 
     $("#action-btn").click(function () {
-       let customer_id = $("#shopcart_customer_id").val();
+       let customer_id = $("#customer_id").val();
 
         $("#flash_message").empty();
 
@@ -207,7 +207,7 @@ $(function () {
 
         ajax.done(function(res){
             clear_form_data()
-            $("#shopcart_customer_id").val(customer_id);
+            $("#customer_id").val(customer_id);
             flash_message("Success")
         });
 
@@ -222,8 +222,8 @@ $(function () {
     // ****************************************
 
     $("#query-btn").click(function () {
-        let customer_id = $("#shopcart_customer_id").val();
-        let max_price = $("#shopcart_max_price").val();
+        let customer_id = $("#customer_id").val();
+        let max_price = $("#max_price").val();
 
         let queryString = ""
 
@@ -264,7 +264,7 @@ $(function () {
             
             // copy the result to the form
             if (firstItem != "") {
-                $("#shopcart_item_list").val(JSON.stringify(res))
+                $("#item_list").val(JSON.stringify(res))
             }
             flash_message("Success");
         });
@@ -280,8 +280,8 @@ $(function () {
     // ****************************************
 
     $("#list-btn").click(function () {
-        let customer_id = $("#shopcart_customer_id").val();
-
+        let customer_id = $("#customer_id").val();
+        
         $("#flash_message").empty();
 
         let ajax = $.ajax({
@@ -314,7 +314,7 @@ $(function () {
 
             // copy the result to the form
             if (firstItem != "") {
-                $("#shopcart_item_list").val(JSON.stringify(res))
+                $("#item_list").val(JSON.stringify(res))
             }
 
             flash_message("Success")
