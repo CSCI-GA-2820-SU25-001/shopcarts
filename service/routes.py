@@ -32,7 +32,7 @@ API_BASEURL = "/api"  # Prefix for REST routes
 ######################################################################
 # ADMIN UI PAGE
 ######################################################################
-@app.route("/api")
+@app.route("/")
 def index():
     """HTML frontend page for Adminintration"""
     return app.send_static_file("index.html")

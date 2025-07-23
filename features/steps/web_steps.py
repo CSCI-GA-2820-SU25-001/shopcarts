@@ -60,9 +60,6 @@ def step_impl(context: Any) -> None:
 @then('I should see "{message}" in the title')
 def step_impl(context: Any, message: str) -> None:
     """Check the document title for a message"""
-    print(message, " = ", context.driver.title)
-    print(context.base_url)
-
     assert message in context.driver.title
 
 
@@ -181,7 +178,6 @@ def step_impl(context: Any, text_string: str, element_name: str) -> None:
     text_string = text_string.replace("^", '"') #My idea when debugging, confirmed with ChatGPT before testing
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     element = context.driver.find_element(By.ID, element_id)
-    print(element.text)
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element_value(
             (By.ID, element_id), text_string
