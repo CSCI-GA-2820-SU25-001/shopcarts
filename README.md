@@ -10,6 +10,10 @@
 
 This project is a simple **Shopcarts Service** that lets customers save items they want to buy. This service has REST API's with all the basic features like adding, viewing, updating, or deleting both the cart and the items in it.
 
+## Deployment
+The deployment root URL is:
+``` https://shopcarts-alex-s-3-dev.apps.rm2.thpm.p1.openshiftapps.com/ ```
+
 
 ## Contents
 
