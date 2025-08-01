@@ -290,6 +290,8 @@ class TestShopcart(TestCase):
         # Create an object that will cause AttributeError when accessing dict keys
 
         class BadObject:
+            """Test class that raises AttributeError when accessed."""
+            
             def __getitem__(self, key):
                 raise AttributeError("test attribute error")
 
@@ -325,6 +327,6 @@ class TestShopcart(TestCase):
         except DataValidationError:
             # This is expected behavior
             pass
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
             # This is also acceptable as it tests the exception handling
-            self.assertIsInstance(e, Exception)
+            self.assertIsInstance(e, (ValueError, TypeError, AttributeError))
