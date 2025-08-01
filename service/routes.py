@@ -230,7 +230,9 @@ class ShopcartCollection(Resource):
             app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
 
         # Return the location of the new Shopcart
-        location_url = url_for("shopcart_resource", _external=True)
+        location_url = url_for(
+            "shopcart_resource", customer_id=shopcart.customer_id, _external=True
+        )
         return (
             shopcart.serialize(),
             status.HTTP_201_CREATED,
@@ -250,7 +252,7 @@ class ShopcartCollection(Resource):
         # Attempt to find the Shopcart and abort if not found
         shopcart = Shopcart.all()
         if not shopcart:
-            return jsonify([]), status.HTTP_200_OK
+            return [], status.HTTP_200_OK
 
         app.logger.info("Returning shopcarts: %s", shopcart)
         return [x.serialize() for x in shopcart], status.HTTP_200_OK
@@ -352,7 +354,7 @@ class ShopcartItemResource(Resource):
     # ------------------------------------------------------------------
     @api.doc("update_item")
     @api.expect(item_model)
-    @api.marshal_with(item_model)
+    @api.marshal_with(shopcart_model)
     @api.response(404, "Shopcart Item not found")
     @api.response(200, "Shopcart  Item updated")
     @api.response(400, "The Shopcart Item data was not valid")
@@ -481,7 +483,10 @@ class ShopcartItemCollection(Resource):
         # Return the location of the new Shopcart
 
         location_url = url_for(
-            "shopcart_item_resource", customer_id=customer_id, _external=True
+            "shopcart_item_resource",
+            customer_id=customer_id,
+            product_id=data["product_id"],
+            _external=True,
         )
         return (
             data,
@@ -520,7 +525,7 @@ def check_content_type(content_type) -> None:
 ######################################################################
 # GET HEALTH CHECK
 ######################################################################
-@app.route("/health")
+@app.route("/api/health")
 def health_check():
     """Let them know our heart is still beating"""
     return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
