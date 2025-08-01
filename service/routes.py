@@ -49,7 +49,7 @@ api = Api(
 ######################################################################
 @app.route("/")
 def index():
-    """HTML frontend page for Adminintration"""
+    """HTML frontend page for Administration"""
     return app.send_static_file("index.html")
 
 
@@ -96,7 +96,7 @@ class ShopcartCollection(Resource):
             app.logger.info("Shopcart with new id [%s] saved!", shopcart.id)
 
         # Return the location of the new Shopcart
-        location_url = url_for("create_shopcarts", _external=True)
+        location_url = url_for("ShopcartResource", _external=True)
         return (
             jsonify(shopcart.serialize()),
             status.HTTP_201_CREATED,
@@ -314,7 +314,7 @@ class ShopcartItemCollection(Resource):
         # Return the location of the new Shopcart
 
         location_url = url_for(
-            "create_shopcarts_item", customer_id=customer_id, _external=True
+            "ShopcartItemResource", customer_id=customer_id, _external=True
         )
         return (
             jsonify(data),
