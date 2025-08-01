@@ -291,7 +291,7 @@ class TestShopcart(TestCase):
 
         class BadObject:
             """Test class that raises AttributeError when accessed."""
-            
+
             def __getitem__(self, key):
                 raise AttributeError("test attribute error")
 
