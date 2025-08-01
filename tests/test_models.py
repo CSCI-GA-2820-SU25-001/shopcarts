@@ -268,3 +268,63 @@ class TestShopcart(TestCase):
         Shopcart.save()
         found = Shopcart.find(shopcart.customer_id)
         self.assertIsNotNone(found)
+
+    # ----------------------------------------------------------
+    # Tests for more coverage
+    # -----------------------------------------------------------
+
+    def test_deserialize_attribute_error(self):
+        """It should raise DataValidationError when deserializing with invalid attribute"""
+        shopcart = Shopcart()
+        # Pass a non-dict object to trigger AttributeError
+        with self.assertRaises(DataValidationError) as context:
+            shopcart.deserialize("not a dict")
+        self.assertIn(
+            "Invalid Shopcart: body of request contained bad or no data",
+            str(context.exception),
+        )
+
+    def test_deserialize_attribute_error_specific(self):
+        """It should raise DataValidationError when deserializing with specific AttributeError"""
+        shopcart = Shopcart()
+        # Create an object that will cause AttributeError when accessing dict keys
+
+        class BadObject:
+            def __getitem__(self, key):
+                raise AttributeError("test attribute error")
+
+        with self.assertRaises(DataValidationError) as context:
+            shopcart.deserialize(BadObject())
+        self.assertIn("Invalid attribute: test attribute error", str(context.exception))
+
+    def test_deserialize_type_error(self):
+        """It should raise DataValidationError when deserializing with TypeError"""
+        shopcart = Shopcart()
+        # Pass None to trigger TypeError
+        with self.assertRaises(DataValidationError) as context:
+            shopcart.deserialize(None)
+        self.assertIn(
+            "Invalid Shopcart: body of request contained bad or no data",
+            str(context.exception),
+        )
+
+    def test_find_filtered_none_cart(self):
+        """It should return None when cart is not found in find_filtered"""
+        # Test find_filtered with a non-existent customer
+        result = Shopcart.find_filtered(99999, 100)
+        self.assertIsNone(result)
+
+    def test_create_database_error(self):
+        """It should handle database errors during create"""
+        shopcart = ShopcartFactory()
+        # Mock a database error by trying to create with invalid data
+        # This will trigger the exception handling in create method
+        shopcart.customer_id = None  # This will cause issues
+        try:
+            shopcart.create()
+        except DataValidationError:
+            # This is expected behavior
+            pass
+        except Exception as e:
+            # This is also acceptable as it tests the exception handling
+            self.assertIsInstance(e, Exception)

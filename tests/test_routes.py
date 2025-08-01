@@ -515,3 +515,77 @@ class TestShopcartService(TestCase):
         data = response.get_json()
         self.assertEqual(data["status"], 200)
         self.assertEqual(data["message"], "Healthy")
+
+    # ----------------------------------------------------------
+    # Test casees for increasing coverage
+    # ----------------------------------------------------------
+
+    def test_update_shopcart_not_found(self):
+        """It should return 404 when updating a non-existent shopcart"""
+        # Try to update a shopcart that doesn't exist
+        test_data = {
+            "customer_id": 999,
+            "item_list": [
+                {"product_id": 1, "description": "Item 1", "price": 200, "quantity": 2}
+            ],
+        }
+        response = self.client.put(
+            f"{BASE_URL}/999", json=test_data, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_shopcart_item_not_found(self):
+        """It should return 404 when updating an item in a non-existent shopcart"""
+        # Try to update an item in a shopcart that doesn't exist
+        test_item = {
+            "product_id": 1,
+            "description": "Item 1",
+            "price": 200,
+            "quantity": 2,
+        }
+        response = self.client.put(
+            f"{BASE_URL}/999/items/1", json=test_item, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_shopcart_item_not_found(self):
+        """It should return 204 when deleting an item from a non-existent shopcart"""
+        # Try to delete an item from a shopcart that doesn't exist
+        response = self.client.delete(f"{BASE_URL}/999/items/1")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_check_content_type_missing_header(self):
+        """It should return 415 when Content-Type header is missing"""
+        # Try to create a shopcart without Content-Type header
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(
+            BASE_URL,
+            data=test_shopcart.serialize(),
+            headers={},  # No Content-Type header
+        )
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_check_content_type_invalid_header(self):
+        """It should return 415 when Content-Type header is invalid"""
+        # Try to create a shopcart with wrong Content-Type
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(
+            BASE_URL,
+            json=test_shopcart.serialize(),
+            headers={"Content-Type": "text/plain"},  # Wrong Content-Type
+        )
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_get_shopcart_item_product_not_found(self):
+        """It should return 404 when product is not found in shopcart"""
+        # Create a shopcart with items
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Try to get a product that doesn't exist in the shopcart
+        new_shopcart = response.get_json()
+        response = self.client.get(
+            f"{BASE_URL}/{new_shopcart['customer_id']}/items/999"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
