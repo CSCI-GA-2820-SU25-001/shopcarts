@@ -295,6 +295,9 @@ class TestShopcart(TestCase):
             def __getitem__(self, key):
                 raise AttributeError("test attribute error")
 
+            def __str__(self):
+                return "BadObject"
+
         with self.assertRaises(DataValidationError) as context:
             shopcart.deserialize(BadObject())
         self.assertIn("Invalid attribute: test attribute error", str(context.exception))
