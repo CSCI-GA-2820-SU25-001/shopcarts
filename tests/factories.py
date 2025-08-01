@@ -15,5 +15,5 @@ class ShopcartFactory(factory.Factory):
         model = Shopcart
 
     id = factory.Sequence(lambda n: n)
-    customer_id = id
+    customer_id = factory.Sequence(lambda n: n + 1)  # Start from 1 to avoid 0
     item_list = []
