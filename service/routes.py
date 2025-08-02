@@ -23,7 +23,7 @@ and Delete Shopcart
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from flask_restx import Api, Resource  # , fields  # , reqparse, inputs
+from flask_restx import Api, Resource, fields  # , reqparse, inputs
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
 
@@ -53,11 +53,38 @@ def index():
     return app.send_static_file("index.html")
 
 
+# Define the model so that the docs reflect what can be sent
+
+item_model = api.model(
+    "Item",
+    {
+        "product_id": fields.Integer(required=True, description="Product ID"),
+        "description": fields.String(required=True, description="Item description"),
+        "quantity": fields.Integer(required=True, description="Quantity"),
+        "price": fields.Float(required=True, description="Price"),
+    },
+)
+
+# Check if item can be inherited from item_model
+shopcart_model = api.model(
+    "Shopcart",
+    {
+        "id": fields.Integer(
+            readonly=True, description="Unique Shopcart ID assigned by the system"
+        ),
+        "customer_id": fields.Integer(required=True, description="Customer ID"),
+        "item_list": fields.List(
+            fields.Nested(item_model),
+            required=False,
+            description="Items in the shopcart",
+        ),
+    },
+)
+
+
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
-
-
 ######################################################################
 #  PATH: /shopcarts/<int:customer_id>
 ######################################################################
@@ -75,7 +102,9 @@ class ShopcartResource(Resource):
     # ------------------------------------------------------------------
     # Read a SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("get_shopcart")
     @api.response(404, "Shopcart not found")
+    @api.marshal_with(shopcart_model)
     def get(self, customer_id):
         """
         Retrieve a single Shopcart
@@ -100,6 +129,7 @@ class ShopcartResource(Resource):
     # ------------------------------------------------------------------
     # Delete a SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("delete_shopcart")
     @api.response(204, "Shopcart deleted")
     def delete(self, customer_id):
         """
@@ -123,6 +153,12 @@ class ShopcartResource(Resource):
     # ------------------------------------------------------------------
     # Update a SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("update_shopcart")
+    @api.response(404, "Shopcart not found")
+    @api.response(400, "The Shopcart data was not valid")
+    @api.response(200, "Shopcart updated")
+    @api.expect(shopcart_model)
+    @api.marshal_with(shopcart_model)
     def put(self, customer_id):
         """
         Update a Shopcart
@@ -166,6 +202,9 @@ class ShopcartCollection(Resource):
     # ------------------------------------------------------------------
     # CREATE A NEW SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("create_shopcart")
+    @api.expect(shopcart_model)
+    @api.marshal_with(shopcart_model, code=201)
     @api.response(400, "The posted Shopcart data was not valid")
     def post(self):
         """Create a new shopcart"""
@@ -201,6 +240,8 @@ class ShopcartCollection(Resource):
     # ------------------------------------------------------------------
     # LIST ALL SHOPCARTS
     # ------------------------------------------------------------------
+    @api.doc("list_shopcarts")
+    @api.marshal_list_with(shopcart_model)
     @api.response(404, "Shopcarts not found")
     def get(self):
         """List all shopcarts"""
@@ -232,6 +273,9 @@ class ShopcartClear(Resource):
     # ------------------------------------------------------------------
     # Clear a SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("clear_shopcart")
+    @api.response(404, "Shopcart not found")
+    @api.response(200, "Shopcart cleared")
     def put(self, customer_id):
         """
         Update a Shopcart
@@ -273,6 +317,8 @@ class ShopcartItemResource(Resource):
     # ------------------------------------------------------------------
     # READ AN INDIVIDUAL ITEM FROM SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("get_item")
+    @api.marshal_with(item_model)
     @api.response(404, "Shopcart Item not found")
     def get(self, customer_id, product_id):
         """
@@ -305,7 +351,11 @@ class ShopcartItemResource(Resource):
     # ------------------------------------------------------------------
     # UPDATE AN ITEM IN SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("update_item")
+    @api.expect(item_model)
+    @api.marshal_with(shopcart_model)
     @api.response(404, "Shopcart Item not found")
+    @api.response(200, "Shopcart  Item updated")
     @api.response(400, "The Shopcart Item data was not valid")
     def put(self, customer_id, product_id):
         """
@@ -341,6 +391,7 @@ class ShopcartItemResource(Resource):
     # ------------------------------------------------------------------
     # DELETE AN ITEM FROM SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("delete_item")
     @api.response(204, "Shopcart item deleted")
     def delete(self, customer_id, product_id):
         """
@@ -381,6 +432,8 @@ class ShopcartItemCollection(Resource):
     # ------------------------------------------------------------------
     # LIST ALL SHOPCART ITEMS
     # ------------------------------------------------------------------
+    @api.doc("list_items")
+    @api.marshal_list_with(item_model)
     def get(self, customer_id):
         """
         Retrieve all Shopcart items
@@ -405,6 +458,9 @@ class ShopcartItemCollection(Resource):
     # ------------------------------------------------------------------
     # CREATE A NEW ITEM IN SHOPCART
     # ------------------------------------------------------------------
+    @api.doc("add_item")
+    @api.expect(item_model)
+    @api.marshal_with(item_model, code=201)
     @api.response(400, "The posted Shopcart item data was not valid")
     def post(self, customer_id):
         """
