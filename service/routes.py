@@ -85,8 +85,6 @@ shopcart_model = api.model(
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
-
-
 ######################################################################
 #  PATH: /shopcarts/<int:customer_id>
 ######################################################################
@@ -244,6 +242,7 @@ class ShopcartCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc("list_shopcarts")
     @api.marshal_list_with(shopcart_model)
+    @api.response(404, "Shopcarts not found")
     def get(self):
         """List all shopcarts"""
 
