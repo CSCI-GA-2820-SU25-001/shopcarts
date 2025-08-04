@@ -21,10 +21,14 @@ spec:
       description: Name of the app
       type: string
       default: shopcarts
+    - name: APP_URL
+      description: Base URL of deployed app
+      type: string
     - name: IMAGE_NAME
       description: Name of the image
       type: string
       default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
+
   tasks:
     - name: deploy
       taskRef:
@@ -35,6 +39,7 @@ spec:
         value: "oc create deploy $(params.app-name) --image=$(params.build-image)"
       runAfter:
         - build
+
     - name: git-clone
       params:
         - name: url
@@ -57,6 +62,7 @@ spec:
       workspaces:
         - name: output
           workspace: pipeline-workspace
+
     - name: linting
       params:
         - name: image
@@ -73,6 +79,7 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
+
     - name: testing
       params:
         - name: pytest-args
@@ -92,6 +99,7 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
+
     - name: buildah
       params:
         - name: IMAGE
@@ -118,6 +126,20 @@ spec:
       taskRef:
         kind: ClusterTask
         name: buildah
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+
+    - name: bdd-tests
+      taskRef:
+        name: behave
+      runAfter:
+        - deploy
+      params:
+        - name: path
+          value: "repo/features"
+        - name: base-url
+          value: $(params.APP_URL)
       workspaces:
         - name: source
           workspace: pipeline-workspace
