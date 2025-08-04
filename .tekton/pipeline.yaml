@@ -1,10 +1,14 @@
-apiVersion: tekton.dev/v1
+apiVersion: tekton.dev/v1beta1
 kind: Pipeline
-metadata:
+metadata:  
   name: cd-pipeline
 spec:
+  description: This pipeline clones tests, lints, builds, and deploys a container to Kubernetes
   workspaces:
     - name: pipeline-workspace
+      description: | 
+        This workspace contains the cloned repo files, so they can be read by the
+        next task.
   params:
     - name: GIT_REPO
       description: Git Repo URL
@@ -22,6 +26,15 @@ spec:
       type: string
       default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
   tasks:
+    - name: deploy
+      taskRef:
+        name: openshift-client
+        kind: ClusterTask
+      params:
+      - name: SCRIPT
+        value: "oc create deploy $(params.app-name) --image=$(params.build-image)"
+      runAfter:
+        - build
     - name: git-clone
       params:
         - name: url
@@ -108,5 +121,3 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
-
-    
