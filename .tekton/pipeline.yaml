@@ -21,4 +21,26 @@ spec:
       description: Name of the image
       type: string
       default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
- 
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_BRANCH)
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: deleteExisting
+          value: 'true'
+        - name: verbose
+          value: 'true'
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: pipeline-workspace 
