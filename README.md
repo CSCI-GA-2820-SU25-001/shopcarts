@@ -24,6 +24,7 @@ The project contains the following:
 .flaskenv           - Environment variables to configure Flask
 .gitattributes      - File to fix Windows CRLF issues
 .devcontainers/     - Folder with support for VSCode Remote Containers
+.tekton/            - Tekton CI/CD pipeline files
 dot-env-example     - copy to .env to use environment variables
 pyproject.toml      - Poetry list of Python libraries required by your code
 Pipfile             - Contains list of python runtime and development dependencies

@@ -10,11 +10,21 @@ spec:
         This workspace contains the cloned repo files, so they can be read by the
         next task.
   params:
-    - name: app-name
-    - name: build-image
-    - name: repo-url
-    - name: branch
+    - name: GIT_REPO
+      description: Git Repo URL
+      type: string
+    - name: GIT_REF 
+      description: Git Ref to be used
+      type: string
       default: master
+    - name: APP_NAME
+      description: Name of the app
+      type: string
+      default: shopcarts
+    - name: IMAGE_NAME
+      description: Name of the image
+      type: string
+      default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
   tasks:
     - name: deploy
       taskRef:
@@ -25,3 +35,89 @@ spec:
         value: "oc create deploy $(params.app-name) --image=$(params.build-image)"
       runAfter:
         - build
+    - name: git-clone
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REF)
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: deleteExisting
+          value: 'true'
+        - name: verbose
+          value: 'true'
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: pipeline-workspace
+    - name: linting
+      params:
+        - name: image
+          value: 'docker.io/python:3.11-slim'
+        - name: path
+          value: service
+        - name: args
+          value: []
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: pylint
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+    - name: testing
+      params:
+        - name: pytest-args
+          value:
+            - '--pspec'
+            - '--cov=service'
+            - '--cov-fail-under=95'
+        - name: secret-name
+          value: postgres-creds
+        - name: secret-key
+          value: database_uri
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: pytest-env
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+    - name: buildah
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+        - name: TLS_VERIFY
+          value: 'true'
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+      runAfter:
+        - linting
+        - testing
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
