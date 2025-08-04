@@ -6,7 +6,9 @@ from os import getenv
 from selenium import webdriver
 
 WAIT_SECONDS = int(getenv("WAIT_SECONDS", "3"))
-BASE_URL = getenv("BASE_URL", "https://shopcarts-alex-s-3-dev.apps.rm2.thpm.p1.openshiftapps.com/")
+BASE_URL = getenv(
+    "BASE_URL", "https://shopcarts-alex-s-3-dev.apps.rm2.thpm.p1.openshiftapps.com"
+)
 DRIVER = getenv("DRIVER", "chrome").lower()
 
 

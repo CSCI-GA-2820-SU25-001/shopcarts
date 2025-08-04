@@ -1,86 +1,128 @@
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
-metadata:  
-  name: cd-pipeline
+metadata:
+  creationTimestamp: '2025-08-04T16:03:14Z'
+  generation: 30
+  managedFields:
+    - apiVersion: tekton.dev/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:finally': {}
+          'f:params': {}
+          'f:tasks': {}
+          'f:workspaces': {}
+      manager: Mozilla
+      operation: Update
+      time: '2025-08-04T20:09:46Z'
+  name: shopcarts-pipeline
+  namespace: alex-s-3-dev
+  resourceVersion: '2228089992'
+  uid: e5ea2d12-eebf-402b-afb5-9dde41d3de4b
 spec:
-  description: This pipeline clones tests, lints, builds, and deploys a container to Kubernetes
-  workspaces:
-    - name: pipeline-workspace
-      description: | 
-        This workspace contains the cloned repo files, so they can be read by the
-        next task.
   params:
-    - name: GIT_REPO
-      description: Git Repo URL
+    - default: 'https://github.com/CSCI-GA-2820-SU25-001/shopcarts.git'
+      description: The URL for the git repo
+      name: GIT_REPO
       type: string
-    - name: GIT_REF 
-      description: Git Ref to be used
+    - default: master
+      description: The reference
+      name: GIT_REF
       type: string
-      default: master
-    - name: APP_NAME
-      description: Name of the app
+    - default: shopcarts
+      description: The name of the application
+      name: APP_NAME
       type: string
-      default: shopcarts
-    - name: APP_URL
-      description: Base URL of deployed app
+    - default: 'image-registry.openshift-image-registry.svc:5000/alex-s-3-dev/$(params.APP_NAME):latest'
+      description: The name of the image registry
+      name: IMAGE_NAME
       type: string
-    - name: IMAGE_NAME
-      description: Name of the image
+    - description: Base URL of deployed app
+      name: APP_URL
       type: string
-      default: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
-
   tasks:
-    - name: deploy
-      taskRef:
-        name: openshift-client
-        kind: ClusterTask
+    - name: clone
       params:
-      - name: SCRIPT
-        value: "oc create deploy $(params.app-name) --image=$(params.build-image)"
-      runAfter:
-        - build
-
-    - name: git-clone
-      params:
-        - name: url
+        - name: CRT_FILENAME
+          value: ca-bundle.crt
+        - name: HTTP_PROXY
+          value: ''
+        - name: HTTPS_PROXY
+          value: ''
+        - name: NO_PROXY
+          value: ''
+        - name: SUBDIRECTORY
+          value: ''
+        - name: USER_HOME
+          value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: URL
           value: $(params.GIT_REPO)
-        - name: revision
+        - name: REVISION
           value: $(params.GIT_REF)
-        - name: submodules
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
           value: 'true'
-        - name: depth
+        - name: DEPTH
           value: '1'
-        - name: sslVerify
-          value: 'true'
-        - name: deleteExisting
-          value: 'true'
-        - name: verbose
-          value: 'true'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
       taskRef:
-        kind: ClusterTask
-        name: git-clone
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
         - name: output
           workspace: pipeline-workspace
-
-    - name: linting
+    - name: deploy
       params:
-        - name: image
-          value: 'docker.io/python:3.11-slim'
+        - name: image-name
+          value: $(params.IMAGE_NAME)
+      runAfter:
+        - build
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: deploy-image
+          - name: namespace
+            value: alex-s-3-dev
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: pipeline-workspace
+    - name: lint
+      params:
         - name: path
           value: service
-        - name: args
-          value: []
       runAfter:
-        - git-clone
+        - clone
       taskRef:
-        kind: Task
-        name: pylint
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: pylint-1
+          - name: namespace
+            value: alex-s-3-dev
+        resolver: cluster
       workspaces:
-        - name: source
+        - name: output
           workspace: pipeline-workspace
-
-    - name: testing
+    - name: test
       params:
         - name: pytest-args
           value:
@@ -92,15 +134,20 @@ spec:
         - name: secret-key
           value: database_uri
       runAfter:
-        - git-clone
+        - clone
       taskRef:
-        kind: Task
-        name: pytest-env
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: pytest-env-1
+          - name: namespace
+            value: alex-s-3-dev
+        resolver: cluster
       workspaces:
-        - name: source
+        - name: output
           workspace: pipeline-workspace
-
-    - name: buildah
+    - name: build
       params:
         - name: IMAGE
           value: $(params.IMAGE_NAME)
@@ -121,25 +168,39 @@ spec:
         - name: SKIP_PUSH
           value: 'false'
       runAfter:
-        - linting
-        - testing
+        - lint
+        - test
       taskRef:
-        kind: ClusterTask
-        name: buildah
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: alex-s-3-dev
+        resolver: cluster
       workspaces:
-        - name: source
+        - name: output
           workspace: pipeline-workspace
-
-    - name: bdd-tests
-      taskRef:
-        name: behave
-      runAfter:
-        - deploy
+    - name: behave
       params:
         - name: path
-          value: "repo/features"
+          value: repo/features
         - name: base-url
           value: $(params.APP_URL)
+      runAfter:
+        - deploy
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: behave-1
+          - name: namespace
+            value: alex-s-3-dev
+        resolver: cluster
       workspaces:
-        - name: source
+        - name: output
           workspace: pipeline-workspace
+  workspaces:
+    - name: pipeline-workspace
