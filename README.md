@@ -88,6 +88,11 @@ The Shopcarts service has these API endpoints:
 
 The UI for API Service Management is located at the `/` root URL.
 
+## API Documentation
+
+The documentation for the RESTful service can be found at:
+``` /apidocs ```
+
 
 ## Commands for running tests and services.
 
