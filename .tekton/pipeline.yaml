@@ -43,4 +43,20 @@ spec:
         name: git-clone
       workspaces:
         - name: output
-          workspace: pipeline-workspace 
+          workspace: pipeline-workspace
+    - name: linting
+      params:
+        - name: image
+          value: 'docker.io/python:3.11-slim'
+        - name: path
+          value: service
+        - name: args
+          value: []
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: pylint
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
