@@ -32,7 +32,7 @@ spec:
     type: string
   - default: ./Dockerfile
     description: |
-      Path to the `Dockerfile` (or `Containerfile`) relative to the `source` workspace.
+      Path to the `Dockerfile` (or `Containerfile`) relative to the `output` workspace.
     name: DOCKERFILE
     type: string
   - default:
@@ -114,9 +114,9 @@ spec:
     - name: PARAMS_VERBOSE
       value: $(params.VERBOSE)
     - name: WORKSPACES_SOURCE_BOUND
-      value: $(workspaces.source.bound)
+      value: $(workspaces.output.bound)
     - name: WORKSPACES_SOURCE_PATH
-      value: $(workspaces.source.path)
+      value: $(workspaces.output.path)
     - name: WORKSPACES_DOCKERCONFIG_BOUND
       value: $(workspaces.dockerconfig.bound)
     - name: WORKSPACES_DOCKERCONFIG_PATH
@@ -150,7 +150,7 @@ spec:
     volumeMounts:
     - mountPath: /scripts
       name: scripts-dir
-    workingDir: $(workspaces.source.path)
+    workingDir: $(workspaces.output.path)
   volumes:
   - emptyDir: {}
     name: scripts-dir
@@ -158,7 +158,7 @@ spec:
   - description: |
       Container build context, like for instnace a application source code
       followed by a `Dockerfile`.
-    name: source
+    name: output
   - description: An optional workspace that allows providing a .docker/config.json
       file for Buildah to access the container registry. The file should be placed
       at the root of the Workspace with name config.json or .dockerconfigjson.

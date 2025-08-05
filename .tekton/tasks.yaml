@@ -3,7 +3,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: pylint
+  name: pylint-1
   labels:
     app.kubernetes.io/version: "0.4"
   annotations:
@@ -14,7 +14,7 @@ metadata:
     tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le"
 spec:
   workspaces:
-    - name: source
+    - name: output
       description: The workspace with the source code.
   description: >-
     Use to run pylint on the provided input source. 
@@ -38,7 +38,7 @@ spec:
   steps:
     - name: pylint
       image: $(params.image)
-      workingDir: $(workspaces.source.path)
+      workingDir: $(workspaces.output.path)
       script: |
         #!/bin/bash
         set -e
@@ -70,7 +70,7 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: pytest-env
+  name: pytest-env-1
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -81,7 +81,7 @@ metadata:
     tekton.dev/platforms: "linux/amd64,linux/s390x,linux/ppc64le"
 spec:
   workspaces:
-    - name: source
+    - name: output
   description: >-
     This task can be used to perform unit tests with pytest.
     It supports both requirements.txt, Pipfile, & poetry.lock files.
@@ -105,7 +105,7 @@ spec:
   steps:
     - name: pytest
       image: quay.io/rofrano/python:3.11-slim
-      workingDir: $(workspaces.source.path)
+      workingDir: $(workspaces.output.path)
       env:
        - name: DATABASE_URI
          valueFrom:
@@ -155,7 +155,7 @@ metadata:
     tekton.dev/platforms: "linux/amd64"
 spec:
   workspaces:
-  - name: source  
+  - name: output  
   description: >-
     This task will update the deployment.yaml with the latest image name
     and then apply that yaml file and it's service file.
@@ -170,7 +170,7 @@ spec:
   steps:
     - name: deploy
       image: quay.io/openshift/origin-cli:latest
-      workingDir: /workspace/source 
+      workingDir: /workspace/output 
       command: ["/bin/bash", "-c"]
       args:
         - |-
@@ -217,7 +217,7 @@ metadata:
     tekton.dev/platforms: "linux/amd64"
 spec:
   workspaces:
-  - name: source  
+  - name: output  
   description: >-
     This task will deploy all of the yaml files in the manifest folder.
   params:
@@ -228,7 +228,7 @@ spec:
   steps:
     - name: apply
       image: quay.io/openshift/origin-cli:latest
-      workingDir: /workspace/source 
+      workingDir: /workspace/output 
       command: ["/bin/bash", "-c"]
       args:
         - |-
@@ -240,7 +240,7 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: behave
+  name: behave-1
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -251,7 +251,7 @@ metadata:
     tekton.dev/platforms: "linux/amd64"
 spec:
   workspaces:
-    - name: source
+    - name: output
   description: >-
     This task can be used to perform bdd tests with behave.
   params:
@@ -269,7 +269,7 @@ spec:
   steps:
     - name: behave
       image: quay.io/rofrano/pipeline-selenium
-      workingDir: $(workspaces.source.path)
+      workingDir: $(workspaces.output.path)
       env:
        - name: BASE_URL
          value: $(params.base-url)
