@@ -90,6 +90,15 @@ shopcart_model = api.model(
 
 
 ######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route("/api/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+
+
+######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 ######################################################################
@@ -534,15 +543,3 @@ def check_content_type(content_type) -> None:
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {content_type}",
     )
-
-
-######################################################################
-# GET HEALTH CHECK
-######################################################################
-@app.route("/api/health")
-class HealthCheck(Resource):
-    """Health Check Resource"""
-
-    def get(self):
-        """Let them know our heart is still beating"""
-        return {"status": "OK"}, status.HTTP_200_OK
