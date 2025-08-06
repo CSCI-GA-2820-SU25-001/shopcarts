@@ -431,7 +431,7 @@ class ShopcartItemResource(Resource):
             app.logger.info("Shopcart for customer: %d found.", customer_id)
             shopcart.delete_subordinate(customer_id, product_id)
         else:
-            app.logger.info("Shopcart for customer: %d found.", customer_id)
+            app.logger.info("Shopcart for customer: %d not found.", customer_id)
         app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
         return {}, status.HTTP_204_NO_CONTENT
 
@@ -461,6 +461,7 @@ class ShopcartItemCollection(Resource):
     @api.expect(parser)
     @api.marshal_list_with(item_model)
     @api.response(400, "The query string was of incorrect type")
+    @api.response(404, "The customer had no shopcart associated")
     def get(self, customer_id):
         """
         Retrieve all Shopcart items
@@ -481,7 +482,13 @@ class ShopcartItemCollection(Resource):
                     "Query string must be of type: Integer",
                 )
         else:
-            shopcart = Shopcart.find(customer_id).item_list
+            try:
+                shopcart = Shopcart.find(customer_id).item_list
+            except AttributeError:
+                abort(
+                    status.HTTP_404_NOT_FOUND,
+                    "Shopcart not found",
+                )
 
         if not shopcart:
             return [], status.HTTP_200_OK
