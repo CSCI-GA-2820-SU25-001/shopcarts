@@ -1,6 +1,6 @@
 # NYU DevOps Shopcart Project
 
-Pipeline Webhook Test!!!
+Pipeline Webhook Test!!
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
