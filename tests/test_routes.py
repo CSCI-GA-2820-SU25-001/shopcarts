@@ -589,3 +589,23 @@ class TestShopcartService(TestCase):
             f"{BASE_URL}/{new_shopcart['customer_id']}/items/999"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_shopcart_items_invalid_query_type(self):
+        """It should return 400 when max-price query parameter is not an integer"""
+        # Create a shopcart
+        test_shopcart = ShopcartFactory()
+        response = self.client.post(BASE_URL, json=test_shopcart.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Try to get items with invalid max-price parameter
+        new_shopcart = response.get_json()
+        response = self.client.get(
+            f"{BASE_URL}/{new_shopcart['customer_id']}/items?max-price=invalid"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_shopcart_items_shopcart_not_found(self):
+        """It should return 404 when shopcart is not found when getting items"""
+        # Try to get items from a shopcart that doesn't exist
+        response = self.client.get(f"{BASE_URL}/999/items")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
