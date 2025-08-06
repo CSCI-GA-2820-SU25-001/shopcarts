@@ -243,8 +243,8 @@ $(function () {
         ajax.done(function(res) {
             //alert(res.toSource())
             $("#search_results").empty();
-            let table = '<table class="table table-striped" cellpadding="10">'
-            table += '<thead><tr>'
+            let table = '<table class="table table-striped table-bordered" cellpadding="10">'
+            table += '<thead class="thead-light"><tr>'
             table += '<th class="col-md-1">Product ID</th>'
             table += '<th class="col-md-2">Price</th>'
             table += '<th class="col-md-2">Quantity</th>'
@@ -252,10 +252,10 @@ $(function () {
             table += '</tr></thead><tbody>'
             let firstItem = "";
             for(let i = 0; i < res.length; i++) {
-                let cart = res[i];
-                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.description}</td></tr>`;
+                let item = res[i];
+                table +=  `<tr id="row_${i}"><td>${item.product_id}</td><td>${item.price}</td><td>${item.quantity}</td><td>${item.description}</td></tr>`;
                 if (i == 0) {
-                    firstItem = cart;
+                    firstItem = item;
                 }
             }
             table += '</tbody></table>'
@@ -276,7 +276,7 @@ $(function () {
     });
 
     // ****************************************
-    // List all Shopcarts
+    // List all Shopcart items
     // ****************************************
 
     $("#list-btn").click(function () {
@@ -294,8 +294,8 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             $("#search_results").empty();
-            let table = '<table class="table table-striped" cellpadding="10">'
-            table += '<thead><tr>'
+            let table = '<table class="table table-striped table-bordered" cellpadding="10">'
+            table += '<thead class="thead-light"><tr>'
             table += '<th class="col-md-1">Product ID</th>'
             table += '<th class="col-md-2">Price</th>'
             table += '<th class="col-md-2">Quantity</th>'
@@ -303,8 +303,57 @@ $(function () {
             table += '</tr></thead><tbody>'
             let firstItem = "";
             for(let i = 0; i < res.length; i++) {
+                let item = res[i];
+                table +=  `<tr id="row_${i}"><td>${item.product_id}</td><td>${item.price}</td><td>${item.quantity}</td><td>${item.description}</td></tr>`;
+                if (i == 0) {
+                    firstItem = item;
+                }
+            }
+            table += '</tbody></table>'
+            $("#search_results").append(table);
+
+            // copy the result to the form
+            if (firstItem != "") {
+                $("#item_list").val(JSON.stringify(res))
+            }
+
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
+    // List all Shopcarts
+    // ****************************************
+
+    $("#all-btn").click(function () {
+        let customer_id = $("#customer_id").val();
+        
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/api/shopcarts/${customer_id}/items`,
+            contentType: "application/json",
+            data: ''
+        })
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            $("#search_results").empty();
+            let table = '<table class="table table-striped table-bordered" cellpadding="10">'
+            table += '<thead class="thead-light"><tr>'
+            table += '<th class="col-md-1">Customer ID</th>'
+            table += '<th class="col-md-8">Item List</th>'
+            table += '</tr></thead><tbody>'
+            let firstItem = "";
+            for(let i = 0; i < res.length; i++) {
                 let cart = res[i];
-                table +=  `<tr id="row_${i}"><td>${cart.product_id}</td><td>${cart.price}</td><td>${cart.quantity}</td><td>${cart.description}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>${cart.customer_id}</td><td>${cart.item_list}</td></tr>`;
                 if (i == 0) {
                     firstItem = cart;
                 }
@@ -325,4 +374,5 @@ $(function () {
         });
 
     });
+    
 });
