@@ -431,7 +431,7 @@ class ShopcartItemResource(Resource):
             app.logger.info("Shopcart for customer: %d found.", customer_id)
             shopcart.delete_subordinate(customer_id, product_id)
         else:
-            app.logger.info("Shopcart for customer: %d found.", customer_id)
+            app.logger.info("Shopcart for customer: %d not found.", customer_id)
         app.logger.info("Shopcart with ID: %d delete complete.", customer_id)
         return {}, status.HTTP_204_NO_CONTENT
 
