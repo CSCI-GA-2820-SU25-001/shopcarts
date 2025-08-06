@@ -23,7 +23,7 @@ and Delete Shopcart
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from flask_restx import Api, Resource, fields  # , reqparse, inputs
+from flask_restx import Api, Resource, fields, reqparse
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
 
@@ -54,14 +54,17 @@ def index():
 
 
 # Define the model so that the docs reflect what can be sent
-
 item_model = api.model(
     "Item",
     {
-        "product_id": fields.Integer(required=True, description="Product ID"),
-        "description": fields.String(required=True, description="Item description"),
-        "quantity": fields.Integer(required=True, description="Quantity"),
-        "price": fields.Float(required=True, description="Price"),
+        "product_id": fields.Integer(
+            required=True, description="Product ID", example=1
+        ),
+        "description": fields.String(
+            required=True, description="Item description", example="Amazing Item"
+        ),
+        "quantity": fields.Integer(required=True, description="Quantity", example=1),
+        "price": fields.Integer(required=True, description="Price", example=420),
     },
 )
 
@@ -70,16 +73,33 @@ shopcart_model = api.model(
     "Shopcart",
     {
         "id": fields.Integer(
-            readonly=True, description="Unique Shopcart ID assigned by the system"
+            readonly=True,
+            description="Unique Shopcart ID assigned by the system",
+            example=39,
         ),
-        "customer_id": fields.Integer(required=True, description="Customer ID"),
+        "customer_id": fields.Integer(
+            required=True, description="Customer ID", example=39
+        ),
         "item_list": fields.List(
             fields.Nested(item_model),
-            required=False,
+            required=True,
             description="Items in the shopcart",
         ),
     },
 )
+
+# Parser for query params
+parser = reqparse.RequestParser()
+parser.add_argument("max-price", type=int, location="args")
+
+
+######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="OK"), status.HTTP_200_OK
 
 
 ######################################################################
@@ -157,8 +177,8 @@ class ShopcartResource(Resource):
     @api.response(404, "Shopcart not found")
     @api.response(400, "The Shopcart data was not valid")
     @api.response(200, "Shopcart updated")
-    @api.expect(shopcart_model)
-    @api.marshal_with(shopcart_model)
+    @api.expect([item_model])
+    @api.marshal_with(shopcart_model, code=200)
     def put(self, customer_id):
         """
         Update a Shopcart
@@ -433,7 +453,14 @@ class ShopcartItemCollection(Resource):
     # LIST ALL SHOPCART ITEMS
     # ------------------------------------------------------------------
     @api.doc("list_items")
+    @api.doc(
+        params={
+            "max-price": "Maximum price of item to filter by",
+        }
+    )
+    @api.expect(parser)
     @api.marshal_list_with(item_model)
+    @api.response(400, "The query string was of incorrect type")
     def get(self, customer_id):
         """
         Retrieve all Shopcart items
@@ -445,7 +472,14 @@ class ShopcartItemCollection(Resource):
 
         # Attempt to find the Shopcart and abort if not found
         if max_price:
-            shopcart = Shopcart.find_filtered(customer_id, max_price)
+            try:
+                max_price = int(max_price)
+                shopcart = Shopcart.find_filtered(customer_id, max_price)
+            except ValueError:
+                abort(
+                    status.HTTP_400_BAD_REQUEST,
+                    "Query string must be of type: Integer",
+                )
         else:
             shopcart = Shopcart.find(customer_id).item_list
 
@@ -459,7 +493,7 @@ class ShopcartItemCollection(Resource):
     # CREATE A NEW ITEM IN SHOPCART
     # ------------------------------------------------------------------
     @api.doc("add_item")
-    @api.expect(item_model)
+    @api.expect(item_model, validate=True)
     @api.marshal_with(item_model, code=201)
     @api.response(400, "The posted Shopcart item data was not valid")
     def post(self, customer_id):
@@ -519,12 +553,3 @@ def check_content_type(content_type) -> None:
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {content_type}",
     )
-
-
-######################################################################
-# GET HEALTH CHECK
-######################################################################
-@app.route("/api/health")
-def health_check():
-    """Let them know our heart is still beating"""
-    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
