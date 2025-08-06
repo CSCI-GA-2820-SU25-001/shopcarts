@@ -54,7 +54,6 @@ def index():
 
 
 # Define the model so that the docs reflect what can be sent
-
 item_model = api.model(
     "Item",
     {
@@ -75,7 +74,7 @@ shopcart_model = api.model(
         "customer_id": fields.Integer(required=True, description="Customer ID"),
         "item_list": fields.List(
             fields.Nested(item_model),
-            required=False,
+            required=True,
             description="Items in the shopcart",
         ),
     },
@@ -157,8 +156,8 @@ class ShopcartResource(Resource):
     @api.response(404, "Shopcart not found")
     @api.response(400, "The Shopcart data was not valid")
     @api.response(200, "Shopcart updated")
-    @api.expect(shopcart_model)
-    @api.marshal_with(shopcart_model)
+    @api.expect([item_model], validate=True)
+    @api.marshal_with(shopcart_model, code=200)
     def put(self, customer_id):
         """
         Update a Shopcart
@@ -459,7 +458,7 @@ class ShopcartItemCollection(Resource):
     # CREATE A NEW ITEM IN SHOPCART
     # ------------------------------------------------------------------
     @api.doc("add_item")
-    @api.expect(item_model)
+    @api.expect(item_model, validate=True)
     @api.marshal_with(item_model, code=201)
     @api.response(400, "The posted Shopcart item data was not valid")
     def post(self, customer_id):
