@@ -532,6 +532,9 @@ def check_content_type(content_type) -> None:
 # GET HEALTH CHECK
 ######################################################################
 @app.route("/api/health")
-def health_check():
-    """Let them know our heart is still beating"""
-    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+class HealthCheck(Resource):
+    """Health Check Resource"""
+
+    def get(self):
+        """Let them know our heart is still beating"""
+        return {"status": "OK"}, status.HTTP_200_OK
