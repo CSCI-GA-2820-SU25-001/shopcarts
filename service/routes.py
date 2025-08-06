@@ -23,7 +23,7 @@ and Delete Shopcart
 
 from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
-from flask_restx import Api, Resource, fields  # , reqparse, inputs
+from flask_restx import Api, Resource, fields, reqparse, inputs
 from service.models import Shopcart
 from service.common import status  # HTTP Status Codes
 
@@ -87,6 +87,10 @@ shopcart_model = api.model(
         ),
     },
 )
+
+# Parser for query params
+parser = reqparse.RequestParser()
+parser.add_argument("max-price", type=int, location="args")
 
 
 ######################################################################
@@ -449,6 +453,12 @@ class ShopcartItemCollection(Resource):
     # LIST ALL SHOPCART ITEMS
     # ------------------------------------------------------------------
     @api.doc("list_items")
+    @api.doc(
+        params={
+            "max-price": "Maximum price of item to filter by",
+        }
+    )
+    @api.expect(parser)
     @api.marshal_list_with(item_model)
     @api.response(400, "The query string was of incorrect type")
     def get(self, customer_id):
@@ -462,9 +472,9 @@ class ShopcartItemCollection(Resource):
 
         # Attempt to find the Shopcart and abort if not found
         if max_price:
-            shopcart = Shopcart.find_filtered(customer_id, max_price)
             try:
                 max_price = int(max_price)
+                shopcart = Shopcart.find_filtered(customer_id, max_price)
             except ValueError:
                 abort(
                     status.HTTP_400_NOT_FOUND,

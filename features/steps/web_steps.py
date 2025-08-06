@@ -156,7 +156,9 @@ def step_impl(context: Any, name: str) -> None:
 def step_impl(context: Any, message: str) -> None:
     # Uncomment next line to take a screenshot of the web page for debugging
     # save_screenshot(context, message)
-    message = message.replace("^", '"') #My idea when debugging, confirmed with ChatGPT before testing
+    message = message.replace(
+        "^", '"'
+    )  # My idea when debugging, confirmed with ChatGPT before testing
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element(
             (By.ID, "flash_message"), message
@@ -175,7 +177,9 @@ def step_impl(context: Any, message: str) -> None:
 
 @then('I should see "{text_string}" in the "{element_name}" field')
 def step_impl(context: Any, text_string: str, element_name: str) -> None:
-    text_string = text_string.replace("^", '"') #My idea when debugging, confirmed with ChatGPT before testing
+    text_string = text_string.replace(
+        "^", '"'
+    )  # My idea when debugging, confirmed with ChatGPT before testing
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     element = context.driver.find_element(By.ID, element_id)
     found = WebDriverWait(context.driver, context.wait_seconds).until(
@@ -188,7 +192,9 @@ def step_impl(context: Any, text_string: str, element_name: str) -> None:
 
 @when('I change "{element_name}" to "{text_string}"')
 def step_impl(context: Any, element_name: str, text_string: str) -> None:
-    text_string = text_string.replace("^", '"') #My idea when debugging, confirmed with ChatGPT before testing
+    text_string = text_string.replace(
+        "^", '"'
+    )  # My idea when debugging, confirmed with ChatGPT before testing
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     element = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.presence_of_element_located((By.ID, element_id))
