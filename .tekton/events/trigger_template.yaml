@@ -19,14 +19,10 @@ spec:
     spec:
       serviceAccountName: pipeline
       pipelineRef:
-        name: cd-pipeline
+        name: shopcarts-pipeline
       params:
-      - name: APP_NAME
-        value: $(tt.params.git-repo-name)
-      - name: GIT_REPO
-        value: $(tt.params.git-repo-url)
-      - name: IMAGE_NAME
-        value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(tt.params.git-repo-name):$(tt.params.git-revision)
+      - name: APP_URL
+        value: https://shopcarts-alex-s-3-dev.apps.rm2.thpm.p1.openshiftapps.com/
       workspaces:
       - name: pipeline-workspace
         persistentVolumeClaim:

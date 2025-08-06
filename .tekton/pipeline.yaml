@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   creationTimestamp: '2025-08-04T16:03:14Z'
-  generation: 30
+  generation: 31
   managedFields:
     - apiVersion: tekton.dev/v1
       fieldsType: FieldsV1
@@ -15,10 +15,10 @@ metadata:
           'f:workspaces': {}
       manager: Mozilla
       operation: Update
-      time: '2025-08-04T20:09:46Z'
+      time: '2025-08-06T15:06:07Z'
   name: shopcarts-pipeline
   namespace: alex-s-3-dev
-  resourceVersion: '2228089992'
+  resourceVersion: '2283761178'
   uid: e5ea2d12-eebf-402b-afb5-9dde41d3de4b
 spec:
   params:
@@ -185,7 +185,7 @@ spec:
     - name: behave
       params:
         - name: path
-          value: repo/features
+          value: features
         - name: base-url
           value: $(params.APP_URL)
       runAfter:
