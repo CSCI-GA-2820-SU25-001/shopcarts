@@ -441,6 +441,7 @@ class ShopcartItemCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc("list_items")
     @api.marshal_list_with(item_model)
+    @api.response(400, "The query string was of incorrect type")
     def get(self, customer_id):
         """
         Retrieve all Shopcart items
@@ -453,6 +454,13 @@ class ShopcartItemCollection(Resource):
         # Attempt to find the Shopcart and abort if not found
         if max_price:
             shopcart = Shopcart.find_filtered(customer_id, max_price)
+            try:
+                max_price = int(max_price)
+            except ValueError:
+                abort(
+                    status.HTTP_400_NOT_FOUND,
+                    "Query string must be of type: Integer",
+                )
         else:
             shopcart = Shopcart.find(customer_id).item_list
 
