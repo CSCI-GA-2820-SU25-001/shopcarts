@@ -86,6 +86,14 @@ Scenario: List all items
     And I should see "200" in the "Item List" field
     And I should see "240" in the "Item List" field
 
+Scenario: List all shopcarts
+    When I visit the "Home Page"
+    And I press the "All" button
+    Then I should see the message "Success"
+    And I should see "23" in the results
+    And I should see "79" in the results
+    And I should see "54" in the results
+    And I should see "81" in the results
 
 Scenario: Delete a shopcart
     When I visit the "Home Page"

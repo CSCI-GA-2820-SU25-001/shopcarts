@@ -133,7 +133,10 @@ def step_impl(context: Any, element_name: str) -> None:
 @when('I press the "{button}" button')
 def step_impl(context: Any, button: str) -> None:
     button_id = button.lower().replace(" ", "_") + "-btn"
-    context.driver.find_element(By.ID, button_id).click()
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, button_id))
+    )
+    element.click()
 
 
 @then('I should see "{name}" in the results')
