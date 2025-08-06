@@ -57,10 +57,14 @@ def index():
 item_model = api.model(
     "Item",
     {
-        "product_id": fields.Integer(required=True, description="Product ID"),
-        "description": fields.String(required=True, description="Item description"),
-        "quantity": fields.Integer(required=True, description="Quantity"),
-        "price": fields.Float(required=True, description="Price"),
+        "product_id": fields.Integer(
+            required=True, description="Product ID", example=1
+        ),
+        "description": fields.String(
+            required=True, description="Item description", example="Amazing Item"
+        ),
+        "quantity": fields.Integer(required=True, description="Quantity", example=1),
+        "price": fields.Integer(required=True, description="Price", example=420),
     },
 )
 
@@ -69,9 +73,13 @@ shopcart_model = api.model(
     "Shopcart",
     {
         "id": fields.Integer(
-            readonly=True, description="Unique Shopcart ID assigned by the system"
+            readonly=True,
+            description="Unique Shopcart ID assigned by the system",
+            example=39,
         ),
-        "customer_id": fields.Integer(required=True, description="Customer ID"),
+        "customer_id": fields.Integer(
+            required=True, description="Customer ID", example=39
+        ),
         "item_list": fields.List(
             fields.Nested(item_model),
             required=True,
@@ -156,7 +164,7 @@ class ShopcartResource(Resource):
     @api.response(404, "Shopcart not found")
     @api.response(400, "The Shopcart data was not valid")
     @api.response(200, "Shopcart updated")
-    @api.expect([item_model], validate=True)
+    @api.expect([item_model])
     @api.marshal_with(shopcart_model, code=200)
     def put(self, customer_id):
         """
