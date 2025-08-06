@@ -477,7 +477,7 @@ class ShopcartItemCollection(Resource):
                 shopcart = Shopcart.find_filtered(customer_id, max_price)
             except ValueError:
                 abort(
-                    status.HTTP_400_NOT_FOUND,
+                    status.HTTP_400_BAD_REQUEST,
                     "Query string must be of type: Integer",
                 )
         else:
